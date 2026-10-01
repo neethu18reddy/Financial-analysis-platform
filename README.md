@@ -172,6 +172,7 @@ Detailed specifications and architectural documents are located in `/docs`:
 * **[SEBI Compliance & Auditability](docs/compliance/sebi_compliance_and_audit.md)** — Regulatory guidelines and lineage.
 * **[Engineering Journal](docs/engineering-journal/phase_0_journal.md)** — Implementation and environment records.
 * **[Phase 0 Checkpoint](docs/phase-checkpoints/phase_0_checkpoint.md)** — Milestone summary and verification.
+* **[Commit History & Changelog](CHANGELOG.md)** — Detailed commit log, milestones, and release notes.
 
 ---
 
