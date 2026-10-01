@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Established the foundational architecture, modular repository structure, FastAPI backend, SQLAlchemy 2.0 database migration environment, React 18 TypeScript frontend shell, cross-stack test suite, and comprehensive documentation suite.
 
 ### 📝 Commit Log
+* **`3df2cfe`** - `docs(readme): overhaul README for high-impact recruiter & engineering portfolio presentation` *(neethu18reddy, 2026-10-02)*
+* **`ed657fa`** - `docs(changelog): add comprehensive commit history and changelog tracking` *(neethu18reddy, 2026-10-01)*
 * **`eca1d4a`** - `docs(readme): add badges, quickstart, and comprehensive repository overview` *(neethu18reddy, 2026-10-01)*
 * **`745f633`** - `docs(architecture): document system architecture, data strategy, methodology, and compliance` *(neethu18reddy, 2026-10-01)*
 * **`3c74cc1`** - `test(all): add backend test suite, database tests, and unified test runner` *(neethu18reddy, 2026-10-01)*
