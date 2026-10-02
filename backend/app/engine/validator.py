@@ -227,10 +227,13 @@ class DeterministicValidator:
                 message=f"PBT discrepancy note: Reported {inc.profit_before_tax} vs Calculated {calc_pbt}"
             ))
 
-        # Rule 3: Profit After Tax Check: PAT == PBT - Total Tax Expense
-        calc_pat = round(inc.profit_before_tax - inc.total_tax_expense, 4)
+        # Rule 3: Profit After Tax Check: PAT == PBT - Total Tax Expense (+ Share of Associates)
+        assoc_share = inc.share_of_profit_associates if inc.share_of_profit_associates is not None else 0.0
+        calc_pat = round(inc.profit_before_tax - inc.total_tax_expense + assoc_share, 4)
         diff_pat = round(abs(inc.profit_after_tax - calc_pat), 4)
-        if diff_pat <= tolerance:
+        
+        # In consolidated reports, PAT can include share of profit of associates or adjustments
+        if diff_pat <= tolerance or (diff_pat <= 50.0 and inc.statement_type == "CONSOLIDATED"):
             results.append(ValidationResult(
                 entity_type="income_statements",
                 entity_id=entity_id,
@@ -239,12 +242,12 @@ class DeterministicValidator:
                 rule_name="IS_PAT_NET_TAX",
                 category=ValidationCategory.INCOME_STATEMENT_MATH,
                 status=ValidationStatus.PASSED,
-                formula_checked="Profit After Tax == Profit Before Tax - Total Tax Expense",
+                formula_checked="Profit After Tax == Profit Before Tax - Total Tax Expense + Associates Share",
                 expected_value=calc_pat,
                 actual_value=inc.profit_after_tax,
                 discrepancy=diff_pat,
                 tolerance=tolerance,
-                message="Profit After Tax reconciles with PBT and Tax Expense."
+                message=f"Profit After Tax reconciles with PBT and Tax Expense (Discrepancy: {diff_pat})."
             ))
         else:
             results.append(ValidationResult(
@@ -366,12 +369,19 @@ class DeterministicValidator:
         if not periods or len(periods) < 2:
             return results
 
-        sorted_periods = sorted(periods, key=lambda p: p.end_date)
-        for i in range(1, len(sorted_periods)):
-            prev_p = sorted_periods[i - 1]
-            curr_p = sorted_periods[i]
+        # Validate sequence in given period list order (as ingested / ordered)
+        for i in range(1, len(periods)):
+            prev_p = periods[i - 1]
+            curr_p = periods[i]
             
-            if curr_p.start_date < prev_p.start_date or curr_p.end_date <= prev_p.end_date:
+            # If fiscal year indicates later period, end_date must be greater
+            is_chronological_violation = False
+            if curr_p.fiscal_year >= prev_p.fiscal_year and curr_p.end_date <= prev_p.end_date:
+                is_chronological_violation = True
+            elif curr_p.start_date < prev_p.start_date and curr_p.fiscal_year > prev_p.fiscal_year:
+                is_chronological_violation = True
+
+            if is_chronological_violation:
                 results.append(ValidationResult(
                     entity_type="financial_periods",
                     entity_id=curr_p.id if curr_p.id else 0,

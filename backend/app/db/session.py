@@ -3,8 +3,12 @@
 from typing import AsyncGenerator, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy import text
-from backend.app.core.config import settings
-from backend.app.core.logging import logger
+try:
+    from backend.app.core.config import settings
+    from backend.app.core.logging import logger
+except ImportError:
+    from app.core.config import settings
+    from app.core.logging import logger
 
 # Create async database engine
 # SQLite requires check_same_thread=False for async connection pools

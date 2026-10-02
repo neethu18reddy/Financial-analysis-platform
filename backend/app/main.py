@@ -11,10 +11,16 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from backend.app.core.config import settings
-from backend.app.core.logging import logger
-from backend.app.api.v1.router import api_router
-from backend.app.db.session import engine
+try:
+    from backend.app.core.config import settings
+    from backend.app.core.logging import logger
+    from backend.app.api.v1.router import api_router
+    from backend.app.db.session import engine
+except ImportError:
+    from app.core.config import settings
+    from app.core.logging import logger
+    from app.api.v1.router import api_router
+    from app.db.session import engine
 
 
 @asynccontextmanager
