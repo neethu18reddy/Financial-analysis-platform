@@ -4,9 +4,14 @@ import platform
 import sys
 from datetime import datetime
 from fastapi import APIRouter, status
-from backend.app.core.config import settings
-from backend.app.db.session import check_database_connectivity
-from backend.app.schemas.health import HealthResponse, DatabaseHealth
+try:
+    from backend.app.core.config import settings
+    from backend.app.db.session import check_database_connectivity
+    from backend.app.schemas.health import HealthResponse, DatabaseHealth
+except ImportError:
+    from app.core.config import settings
+    from app.db.session import check_database_connectivity
+    from app.schemas.health import HealthResponse, DatabaseHealth
 
 router = APIRouter()
 
