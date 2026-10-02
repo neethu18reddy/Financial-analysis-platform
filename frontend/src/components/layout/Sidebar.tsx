@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Layers, Database, Lock, Terminal } from 'lucide-react';
+import { Activity, Layers, Database, Lock, Terminal, Building2 } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
@@ -55,12 +55,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
           <span>Data Pipeline Spec</span>
         </div>
 
-        <div style={{ marginTop: '1.5rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-          Future Phases (Locked)
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
+          Phase 1 Data Engine
         </div>
-        <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
-          <Lock size={16} />
-          <span>Company Financials (P1)</span>
+        <div
+          className={`nav-item ${currentTab === 'financials' ? 'active' : ''}`}
+          onClick={() => onSelectTab('financials')}
+        >
+          <Building2 size={18} />
+          <span>Financial Data Engine</span>
+        </div>
+
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+          Future Phases (Locked)
         </div>
         <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
           <Lock size={16} />

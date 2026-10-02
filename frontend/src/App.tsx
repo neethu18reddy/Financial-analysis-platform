@@ -3,11 +3,12 @@ import { AppLayout } from './components/layout/AppLayout';
 import { SystemHealthView } from './views/SystemHealthView';
 import { ArchitectureView } from './views/ArchitectureView';
 import { DataPipelineView } from './views/DataPipelineView';
+import { FinancialDataEngineView } from './views/FinancialDataEngineView';
 import { ApiService } from './services/api';
 import { HealthResponse } from './types/api';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<string>('health');
+  const [currentTab, setCurrentTab] = useState<string>('financials');
   const [healthData, setHealthData] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function App() {
       systemStatus={systemStatus}
       version={version}
     >
+      {currentTab === 'financials' && <FinancialDataEngineView />}
       {currentTab === 'health' && (
         <SystemHealthView
           healthData={healthData}
