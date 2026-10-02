@@ -9,8 +9,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_Async-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Tests Passing](https://img.shields.io/badge/Test_Coverage-100%25_Passing-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
-[![Architecture](https://img.shields.io/badge/Architecture-ADR_Documented-blueviolet?style=for-the-badge)](docs/architecture/)
+[![Phase 1 Complete](https://img.shields.io/badge/Phase_1-Data_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_1_checkpoint.md)
+[![Tests Passing](https://img.shields.io/badge/Test_Suite-27_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
 <p align="center">
   <a href="#-executive-summary">Executive Summary</a> •
