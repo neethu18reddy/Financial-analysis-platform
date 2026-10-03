@@ -255,3 +255,96 @@ export interface SourceProviderMetadata {
   primary_url: string;
   supported_classifications: string[];
 }
+
+export interface CalculatedMetric {
+  metric_key: string;
+  metric_label: string;
+  value?: number | null;
+  formatted_value: string;
+  unit: string;
+  methodology_version: string;
+  formula_expression: string;
+  inputs: Record<string, any>;
+  is_valid: boolean;
+  notes?: string | null;
+}
+
+export interface PeriodFundamentalAnalysis {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  fiscal_quarter?: number | null;
+  period_type: string;
+  profitability: Record<string, CalculatedMetric>;
+  growth: Record<string, CalculatedMetric>;
+  working_capital: Record<string, CalculatedMetric>;
+  cash_quality: Record<string, CalculatedMetric>;
+}
+
+export interface CompanyFundamentalResponse {
+  company_id: number;
+  company_ticker: string;
+  legal_name: string;
+  statement_type: string;
+  methodology_version: string;
+  periods_data: PeriodFundamentalAnalysis[];
+}
+
+export interface DuPontStep3 {
+  net_profit_margin: CalculatedMetric;
+  asset_turnover: CalculatedMetric;
+  equity_multiplier: CalculatedMetric;
+  computed_roe: CalculatedMetric;
+  reported_roe: CalculatedMetric;
+}
+
+export interface DuPontStep5 {
+  tax_burden: CalculatedMetric;
+  interest_burden: CalculatedMetric;
+  operating_margin: CalculatedMetric;
+  asset_turnover: CalculatedMetric;
+  equity_multiplier: CalculatedMetric;
+  computed_roe: CalculatedMetric;
+}
+
+export interface DuPontDecompositionResult {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  step_3: DuPontStep3;
+  step_5?: DuPontStep5 | null;
+}
+
+export interface CompanyDuPontResponse {
+  company_id: number;
+  company_ticker: string;
+  statement_type: string;
+  methodology_version: string;
+  periods_dupont: DuPontDecompositionResult[];
+}
+
+export interface CommonSizeLineItem {
+  item_key: string;
+  item_label: string;
+  raw_value: number;
+  percent_of_base: number;
+  is_header: boolean;
+  level: number;
+}
+
+export interface CommonSizeStatement {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  base_metric_label: string;
+  base_metric_value: number;
+  items: CommonSizeLineItem[];
+}
+
+export interface CompanyCommonSizeResponse {
+  company_id: number;
+  company_ticker: string;
+  statement_type: string;
+  statement_kind: string;
+  periods_common_size: CommonSizeStatement[];
+}

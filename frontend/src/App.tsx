@@ -4,11 +4,12 @@ import { SystemHealthView } from './views/SystemHealthView';
 import { ArchitectureView } from './views/ArchitectureView';
 import { DataPipelineView } from './views/DataPipelineView';
 import { FinancialDataEngineView } from './views/FinancialDataEngineView';
+import { FundamentalAnalysisView } from './views/FundamentalAnalysisView';
 import { ApiService } from './services/api';
 import { HealthResponse } from './types/api';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<string>('financials');
+  const [currentTab, setCurrentTab] = useState<string>('fundamental');
   const [healthData, setHealthData] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,7 @@ export function App() {
       systemStatus={systemStatus}
       version={version}
     >
+      {currentTab === 'fundamental' && <FundamentalAnalysisView />}
       {currentTab === 'financials' && <FinancialDataEngineView />}
       {currentTab === 'health' && (
         <SystemHealthView
@@ -56,3 +58,4 @@ export function App() {
 }
 
 export default App;
+

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Activity, Layers, Database, Lock, Terminal, Building2 } from 'lucide-react';
+import { Activity, Layers, Database, Lock, Terminal, Building2, TrendingUp } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
@@ -55,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
           <span>Data Pipeline Spec</span>
         </div>
 
-        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
           Phase 1 Data Engine
         </div>
         <div
@@ -66,16 +65,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
           <span>Financial Data Engine</span>
         </div>
 
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
+          Phase 2 Fundamental Engine
+        </div>
+        <div
+          className={`nav-item ${currentTab === 'fundamental' ? 'active' : ''}`}
+          onClick={() => onSelectTab('fundamental')}
+        >
+          <TrendingUp size={18} />
+          <span>Fundamental Analysis</span>
+        </div>
+
         <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
           Future Phases (Locked)
         </div>
         <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
           <Lock size={16} />
-          <span>Forensic Analytics (P2)</span>
+          <span>Forensic Analytics (P3)</span>
         </div>
         <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
           <Lock size={16} />
-          <span>AI Decision Engine (P3)</span>
+          <span>AI Decision Engine (P4)</span>
         </div>
       </nav>
 

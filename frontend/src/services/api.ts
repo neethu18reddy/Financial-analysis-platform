@@ -8,6 +8,9 @@ import {
   DataProvenance,
   CorporateAction,
   SourceProviderMetadata,
+  CompanyFundamentalResponse,
+  CompanyDuPontResponse,
+  CompanyCommonSizeResponse,
 } from '../types/api';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -87,4 +90,49 @@ export const ApiService = {
   async getSources(): Promise<SourceProviderMetadata[]> {
     return fetchJson<SourceProviderMetadata[]>('/sources');
   },
+
+  async getFundamentalAnalysis(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<CompanyFundamentalResponse> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<CompanyFundamentalResponse>(
+      `/companies/${encodeURIComponent(identifier)}/analysis/full?${params.toString()}`
+    );
+  },
+
+  async getDuPontAnalysis(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<CompanyDuPontResponse> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<CompanyDuPontResponse>(
+      `/companies/${encodeURIComponent(identifier)}/analysis/dupont?${params.toString()}`
+    );
+  },
+
+  async getCommonSizeStatements(
+    identifier: string,
+    statementKind: 'INCOME_STATEMENT' | 'BALANCE_SHEET' = 'INCOME_STATEMENT',
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<CompanyCommonSizeResponse> {
+    const params = new URLSearchParams({
+      statement_kind: statementKind,
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<CompanyCommonSizeResponse>(
+      `/companies/${encodeURIComponent(identifier)}/analysis/common-size?${params.toString()}`
+    );
+  },
 };
+
