@@ -9,12 +9,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_Async-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Phase 1 Checkpoint](https://img.shields.io/badge/Phase_1-Data_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_1_checkpoint.md)
-[![Test Coverage](https://img.shields.io/badge/Test_Suite-27_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Phase 2 Checkpoint](https://img.shields.io/badge/Phase_2-Fundamental_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_2_checkpoint.md)
+[![Test Coverage](https://img.shields.io/badge/Test_Suite-38_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
 <p align="center">
   <a href="#-executive-summary">Executive Summary</a> •
   <a href="#-the-cardinal-law-of-financial-computing">Core Law</a> •
+  <a href="#-phase-2-fundamental-analysis-engine">Phase 2 Engine</a> •
   <a href="#-phase-1-financial-data-engine">Phase 1 Engine</a> •
   <a href="#-system-architecture">Architecture</a> •
   <a href="#-data-provenance--audit-trail">Provenance</a> •
@@ -51,6 +52,35 @@ This platform solves this fundamental problem through a **hard computational bou
 ```
 
 > **Cardinal Rule:** The LLM is **NOT** a source of truth or a calculator. Mathematical correctness is guaranteed by code, verified by deterministic tests, and backed by immutable audit lineage.
+
+---
+
+## 📈 Phase 2: Fundamental Analysis Engine Capabilities
+
+Phase 2 builds directly upon the Phase 1 Financial Data Engine to provide institutional-grade fundamental analysis for Indian listed companies with pure Python calculation determinism:
+
+1. **Profitability & Return Ratios:**
+   - Margins: Gross Margin, EBITDA Margin, EBIT Margin, PAT (Net Profit) Margin.
+   - Capital Efficiency: Return on Equity (ROE), Return on Capital Employed (ROCE), Return on Invested Capital (ROIC with dynamic NOPAT and bounded tax rates), Return on Assets (ROA).
+2. **Growth Trajectory & Multi-Year CAGR:**
+   - YoY growth rates across Revenue, EBITDA, EBIT, PAT, CFO, and FCF.
+   - Multi-year Compound Annual Growth Rate (CAGR) with strict boundary protections (non-positive bases flagged as undefined).
+3. **Working Capital & Efficiency:**
+   - Operating cycles: Days Sales Outstanding (DSO), Days Inventory Outstanding (DIO), Days Payables Outstanding (DPO), Cash Conversion Cycle (CCC).
+   - Liquidity & Turnover: Total Asset Turnover, Current Ratio, Quick Ratio.
+4. **Cash Quality & Earnings Integrity:**
+   - Cash Realization: CFO/PAT Ratio, FCF/PAT Ratio.
+   - Sloan Balance Sheet Accrual Ratio (% of Total Assets).
+   - Solvency: Operating Cash Flow to Total Debt.
+5. **DuPont Multiplicative Decomposition:**
+   - 3-Step DuPont Identity: $\text{ROE} = \text{Net Margin} \times \text{Asset Turnover} \times \text{Equity Multiplier}$.
+   - 5-Step Extended DuPont Identity: $\text{ROE} = \text{Tax Burden} \times \text{Interest Burden} \times \text{Operating Margin} \times \text{Asset Turnover} \times \text{Equity Multiplier}$.
+6. **Vertical Common-Size Financial Statements:**
+   - Standardized Common-Size Income Statement (% of Total Revenue).
+   - Standardized Common-Size Balance Sheet (% of Total Assets).
+7. **Lineage & Methodology Versioning:**
+   - Every metric delivers full data contracts (`CalculatedMetric`) with methodology `v1.0.0`, mathematical formulas, and input dictionaries.
+   - Interactive UI **Formula & Lineage Inspector Modal** provides instantaneous auditability.
 
 ---
 
