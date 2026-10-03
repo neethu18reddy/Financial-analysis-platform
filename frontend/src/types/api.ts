@@ -269,82 +269,116 @@ export interface CalculatedMetric {
   notes?: string | null;
 }
 
+export interface MultiPeriodCAGRSummary {
+  num_years: number;
+  base_period_label: string;
+  latest_period_label: string;
+  revenue_cagr?: number | null;
+  ebitda_cagr?: number | null;
+  ebit_cagr?: number | null;
+  pat_cagr?: number | null;
+  cfo_cagr?: number | null;
+}
+
+export interface DuPont3Step {
+  net_profit_margin: number;
+  asset_turnover: number;
+  financial_leverage: number;
+  roe_calculated: number;
+  roe_reported: number;
+  is_valid: boolean;
+  formula_expression: string;
+}
+
+export interface DuPont5Step {
+  tax_burden: number;
+  interest_burden: number;
+  operating_margin: number;
+  asset_turnover: number;
+  financial_leverage: number;
+  roe_calculated: number;
+  roe_reported: number;
+  is_valid: boolean;
+  formula_expression: string;
+}
+
+export interface DuPontDecompositionResult {
+  methodology_version: string;
+  dupont_3step?: DuPont3Step | null;
+  dupont_5step?: DuPont5Step | null;
+  inputs: Record<string, any>;
+  key_driver_analysis: string;
+}
+
+export interface CommonSizeLineItem {
+  line_item_key: string;
+  line_item_label: string;
+  raw_value: number;
+  percentage_of_base: number;
+  base_label: string;
+}
+
+export interface CommonSizeIncomeStatement {
+  base_revenue: number;
+  items: CommonSizeLineItem[];
+}
+
+export interface CommonSizeBalanceSheet {
+  base_assets: number;
+  items: CommonSizeLineItem[];
+}
+
 export interface PeriodFundamentalAnalysis {
   period_id: number;
   period_label: string;
   fiscal_year: number;
-  fiscal_quarter?: number | null;
-  period_type: string;
+  end_date: string;
+  statement_type: string;
   profitability: Record<string, CalculatedMetric>;
   growth: Record<string, CalculatedMetric>;
   working_capital: Record<string, CalculatedMetric>;
   cash_quality: Record<string, CalculatedMetric>;
+  dupont?: DuPontDecompositionResult | null;
+  common_size_income?: CommonSizeIncomeStatement | null;
+  common_size_balance?: CommonSizeBalanceSheet | null;
 }
 
-export interface CompanyFundamentalResponse {
+export interface FundamentalAnalysisResponse {
   company_id: number;
-  company_ticker: string;
+  ticker: string;
   legal_name: string;
+  sector: string;
   statement_type: string;
   methodology_version: string;
-  periods_data: PeriodFundamentalAnalysis[];
+  periods_analysis: PeriodFundamentalAnalysis[];
+  cagr_summary?: MultiPeriodCAGRSummary | null;
 }
 
-export interface DuPontStep3 {
-  net_profit_margin: CalculatedMetric;
-  asset_turnover: CalculatedMetric;
-  equity_multiplier: CalculatedMetric;
-  computed_roe: CalculatedMetric;
-  reported_roe: CalculatedMetric;
-}
-
-export interface DuPontStep5 {
-  tax_burden: CalculatedMetric;
-  interest_burden: CalculatedMetric;
-  operating_margin: CalculatedMetric;
-  asset_turnover: CalculatedMetric;
-  equity_multiplier: CalculatedMetric;
-  computed_roe: CalculatedMetric;
-}
-
-export interface DuPontDecompositionResult {
-  period_id: number;
-  period_label: string;
-  fiscal_year: number;
-  step_3: DuPontStep3;
-  step_5?: DuPontStep5 | null;
-}
+export type CompanyFundamentalResponse = FundamentalAnalysisResponse;
 
 export interface CompanyDuPontResponse {
   company_id: number;
-  company_ticker: string;
+  ticker: string;
   statement_type: string;
-  methodology_version: string;
-  periods_dupont: DuPontDecompositionResult[];
-}
-
-export interface CommonSizeLineItem {
-  item_key: string;
-  item_label: string;
-  raw_value: number;
-  percent_of_base: number;
-  is_header: boolean;
-  level: number;
-}
-
-export interface CommonSizeStatement {
-  period_id: number;
-  period_label: string;
-  fiscal_year: number;
-  base_metric_label: string;
-  base_metric_value: number;
-  items: CommonSizeLineItem[];
+  periods: Array<{
+    period_id: number;
+    period_label: string;
+    fiscal_year: number;
+    dupont?: DuPontDecompositionResult | null;
+  }>;
 }
 
 export interface CompanyCommonSizeResponse {
   company_id: number;
-  company_ticker: string;
+  ticker: string;
   statement_type: string;
-  statement_kind: string;
-  periods_common_size: CommonSizeStatement[];
+  periods: Array<{
+    period_id: number;
+    period_label: string;
+    fiscal_year: number;
+    common_size_income?: CommonSizeIncomeStatement | null;
+    common_size_balance?: CommonSizeBalanceSheet | null;
+  }>;
 }
+
+

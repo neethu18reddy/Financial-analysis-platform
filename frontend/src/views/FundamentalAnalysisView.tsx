@@ -13,12 +13,9 @@ import {
 import { ApiService } from '../services/api';
 import {
   Company,
-  CompanyFundamentalResponse,
-  CompanyDuPontResponse,
-  CompanyCommonSizeResponse,
+  FundamentalAnalysisResponse,
   CalculatedMetric,
   PeriodFundamentalAnalysis,
-  DuPontDecompositionResult,
 } from '../types/api';
 
 type ActiveAnalysisTab = 'profitability' | 'growth' | 'working_capital' | 'cash_quality' | 'dupont' | 'common_size';
@@ -31,10 +28,7 @@ export const FundamentalAnalysisView: React.FC = () => {
   const [commonSizeKind, setCommonSizeKind] = useState<'INCOME_STATEMENT' | 'BALANCE_SHEET'>('INCOME_STATEMENT');
   const [limitPeriods, setLimitPeriods] = useState<number>(5);
 
-  const [fundamentalData, setFundamentalData] = useState<CompanyFundamentalResponse | null>(null);
-  const [dupontData, setDupontData] = useState<CompanyDuPontResponse | null>(null);
-  const [commonSizeData, setCommonSizeData] = useState<CompanyCommonSizeResponse | null>(null);
-
+  const [analysisData, setAnalysisData] = useState<FundamentalAnalysisResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,28 +61,21 @@ export const FundamentalAnalysisView: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      if (activeTab === 'dupont') {
-        const res = await ApiService.getDuPontAnalysis(selectedTicker, statementType, limitPeriods);
-        setDupontData(res);
-      } else if (activeTab === 'common_size') {
-        const res = await ApiService.getCommonSizeStatements(selectedTicker, commonSizeKind, statementType, limitPeriods);
-        setCommonSizeData(res);
-      } else {
-        const res = await ApiService.getFundamentalAnalysis(selectedTicker, statementType, limitPeriods);
-        setFundamentalData(res);
-      }
+      const res = await ApiService.getFundamentalAnalysis(selectedTicker, statementType, limitPeriods);
+      setAnalysisData(res);
     } catch (err: any) {
       setError(err.message || 'Failed to load fundamental analytical data');
     } finally {
       setLoading(false);
     }
-  }, [selectedTicker, statementType, limitPeriods, activeTab, commonSizeKind]);
+  }, [selectedTicker, statementType, limitPeriods]);
 
   useEffect(() => {
     loadAnalysisData();
   }, [loadAnalysisData]);
 
   const selectedCompany = companies.find(c => c.ticker === selectedTicker);
+  const periods = analysisData?.periods_analysis || [];
 
   return (
     <div className="view-container" style={{ padding: '1.5rem', maxWidth: '1440px', margin: '0 auto' }}>
@@ -303,50 +290,68 @@ export const FundamentalAnalysisView: React.FC = () => {
         </div>
       )}
 
+      {/* Empty State */}
+      {!loading && !error && periods.length === 0 && (
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '3rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)'
+        }}>
+          <Info size={32} style={{ margin: '0 auto 1rem', display: 'block', color: 'var(--accent-primary)' }} />
+          <h3>No financial periods available for {selectedTicker}</h3>
+          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+            Please select a company with ingested financial statements from the dropdown above.
+          </p>
+        </div>
+      )}
+
       {/* Tab 1: Profitability & Returns */}
-      {!loading && activeTab === 'profitability' && fundamentalData && (
+      {!loading && activeTab === 'profitability' && periods.length > 0 && (
         <ProfitabilitySection
-          periodsData={fundamentalData.periods_data}
+          periodsData={periods}
           onInspectMetric={(metric, periodLabel) => setInspectMetric({ metric, periodLabel, category: 'Profitability' })}
         />
       )}
 
       {/* Tab 2: Growth Trajectory */}
-      {!loading && activeTab === 'growth' && fundamentalData && (
+      {!loading && activeTab === 'growth' && periods.length > 0 && (
         <GrowthSection
-          periodsData={fundamentalData.periods_data}
+          periodsData={periods}
+          cagrSummary={analysisData?.cagr_summary}
           onInspectMetric={(metric, periodLabel) => setInspectMetric({ metric, periodLabel, category: 'Growth' })}
         />
       )}
 
       {/* Tab 3: Working Capital & Efficiency */}
-      {!loading && activeTab === 'working_capital' && fundamentalData && (
+      {!loading && activeTab === 'working_capital' && periods.length > 0 && (
         <WorkingCapitalSection
-          periodsData={fundamentalData.periods_data}
+          periodsData={periods}
           onInspectMetric={(metric, periodLabel) => setInspectMetric({ metric, periodLabel, category: 'Working Capital' })}
         />
       )}
 
       {/* Tab 4: Cash Quality */}
-      {!loading && activeTab === 'cash_quality' && fundamentalData && (
+      {!loading && activeTab === 'cash_quality' && periods.length > 0 && (
         <CashQualitySection
-          periodsData={fundamentalData.periods_data}
+          periodsData={periods}
           onInspectMetric={(metric, periodLabel) => setInspectMetric({ metric, periodLabel, category: 'Cash Quality' })}
         />
       )}
 
       {/* Tab 5: DuPont ROE Decomposition */}
-      {!loading && activeTab === 'dupont' && dupontData && (
+      {!loading && activeTab === 'dupont' && periods.length > 0 && (
         <DuPontSection
-          periodsDuPont={dupontData.periods_dupont}
-          onInspectMetric={(metric, periodLabel) => setInspectMetric({ metric, periodLabel, category: 'DuPont Analysis' })}
+          periodsData={periods}
         />
       )}
 
       {/* Tab 6: Common-Size Statements */}
-      {!loading && activeTab === 'common_size' && commonSizeData && (
+      {!loading && activeTab === 'common_size' && periods.length > 0 && (
         <CommonSizeSection
-          data={commonSizeData}
+          periodsData={periods}
           kind={commonSizeKind}
           onKindChange={(k) => setCommonSizeKind(k)}
         />
@@ -384,18 +389,20 @@ const ProfitabilitySection: React.FC<SectionProps> = ({ periodsData, onInspectMe
     { key: 'ROA', label: 'Return on Assets (ROA)', highlight: false },
   ];
 
+  const latestPeriod = periodsData[periodsData.length - 1] || periodsData[0];
+
   return (
     <div>
       {/* Latest Period Snapshot Cards */}
-      {periodsData.length > 0 && (
+      {latestPeriod && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           {['ROCE', 'ROE', 'ROIC', 'PAT_MARGIN'].map(key => {
-            const m = periodsData[0].profitability[key];
+            const m = latestPeriod.profitability?.[key];
             if (!m) return null;
             return (
               <div
                 key={key}
-                onClick={() => onInspectMetric(m, periodsData[0].period_label)}
+                onClick={() => onInspectMetric(m, latestPeriod.period_label)}
                 style={{
                   backgroundColor: 'var(--bg-card)',
                   border: '1px solid var(--border-color)',
@@ -416,7 +423,7 @@ const ProfitabilitySection: React.FC<SectionProps> = ({ periodsData, onInspectMe
                   {m.formatted_value}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                  Period: <strong>{periodsData[0].period_label}</strong>
+                  Period: <strong>{latestPeriod.period_label}</strong>
                 </div>
               </div>
             );
@@ -433,7 +440,7 @@ const ProfitabilitySection: React.FC<SectionProps> = ({ periodsData, onInspectMe
       }}>
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Historical Profitability & Return Ratios</h3>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Click any metric row to inspect mathematical derivation</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Click any metric cell to inspect mathematical derivation</span>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
@@ -460,7 +467,7 @@ const ProfitabilitySection: React.FC<SectionProps> = ({ periodsData, onInspectMe
                     {meta.label}
                   </td>
                   {periodsData.map(p => {
-                    const m = p.profitability[meta.key];
+                    const m = p.profitability?.[meta.key];
                     return (
                       <td
                         key={p.period_id}
@@ -489,7 +496,11 @@ const ProfitabilitySection: React.FC<SectionProps> = ({ periodsData, onInspectMe
   );
 };
 
-const GrowthSection: React.FC<SectionProps> = ({ periodsData, onInspectMetric }) => {
+const GrowthSection: React.FC<{
+  periodsData: PeriodFundamentalAnalysis[];
+  cagrSummary?: any;
+  onInspectMetric: (metric: CalculatedMetric, periodLabel: string) => void;
+}> = ({ periodsData, cagrSummary, onInspectMetric }) => {
   const yoyMetrics = [
     { key: 'REVENUE_YOY', label: 'Revenue YoY Growth' },
     { key: 'EBITDA_YOY', label: 'EBITDA YoY Growth' },
@@ -497,13 +508,6 @@ const GrowthSection: React.FC<SectionProps> = ({ periodsData, onInspectMetric })
     { key: 'PAT_YOY', label: 'Net Profit (PAT) YoY Growth' },
     { key: 'CFO_YOY', label: 'Operating Cash Flow (CFO) YoY' },
     { key: 'FCF_YOY', label: 'Free Cash Flow (FCF) YoY' },
-  ];
-
-  const cagrMetrics = [
-    { key: 'REVENUE_CAGR_3Y', label: 'Revenue 3-Year CAGR' },
-    { key: 'EBITDA_CAGR_3Y', label: 'EBITDA 3-Year CAGR' },
-    { key: 'PAT_CAGR_3Y', label: 'PAT 3-Year CAGR' },
-    { key: 'CFO_CAGR_3Y', label: 'CFO 3-Year CAGR' },
   ];
 
   return (
@@ -535,7 +539,7 @@ const GrowthSection: React.FC<SectionProps> = ({ periodsData, onInspectMetric })
                 <tr key={meta.key} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>{meta.label}</td>
                   {periodsData.map(p => {
-                    const m = p.growth[meta.key];
+                    const m = p.growth?.[meta.key];
                     const val = m?.value;
                     const isPositive = val !== null && val !== undefined && val > 0;
                     const isNegative = val !== null && val !== undefined && val < 0;
@@ -562,64 +566,55 @@ const GrowthSection: React.FC<SectionProps> = ({ periodsData, onInspectMetric })
         </div>
       </div>
 
-      {/* CAGR Table */}
-      <div style={{
-        backgroundColor: 'var(--bg-card)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '8px',
-        overflow: 'hidden'
-      }}>
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)' }}>
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Compound Annual Growth Rate (CAGR)</h3>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Strict boundary verification applied. If base year is negative or zero, CAGR is safely marked undefined.
+      {/* CAGR Summary Cards if available */}
+      {cagrSummary && (
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '1.25rem'
+        }}>
+          <h3 style={{ margin: '0 0 0.25rem', fontSize: '1rem', fontWeight: 700 }}>
+            Compound Annual Growth Rate ({cagrSummary.num_years}-Year CAGR)
+          </h3>
+          <p style={{ margin: '0 0 1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            Spanning base period <strong>{cagrSummary.base_period_label}</strong> to <strong>{cagrSummary.latest_period_label}</strong>. Strict boundary guardrails applied.
           </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Revenue CAGR</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)', marginTop: '0.25rem' }}>
+                {cagrSummary.revenue_cagr !== null && cagrSummary.revenue_cagr !== undefined ? `${cagrSummary.revenue_cagr.toFixed(2)}%` : '—'}
+              </div>
+            </div>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>EBITDA CAGR</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)', marginTop: '0.25rem' }}>
+                {cagrSummary.ebitda_cagr !== null && cagrSummary.ebitda_cagr !== undefined ? `${cagrSummary.ebitda_cagr.toFixed(2)}%` : '—'}
+              </div>
+            </div>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PAT (Profit) CAGR</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)', marginTop: '0.25rem' }}>
+                {cagrSummary.pat_cagr !== null && cagrSummary.pat_cagr !== undefined ? `${cagrSummary.pat_cagr.toFixed(2)}%` : '—'}
+              </div>
+            </div>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CFO (Cash) CAGR</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)', marginTop: '0.25rem' }}>
+                {cagrSummary.cfo_cagr !== null && cagrSummary.cfo_cagr !== undefined ? `${cagrSummary.cfo_cagr.toFixed(2)}%` : '—'}
+              </div>
+            </div>
+          </div>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ textAlign: 'left', padding: '0.75rem 1.25rem', fontWeight: 600, color: 'var(--text-muted)' }}>Trajectory Metric</th>
-                {periodsData.map(p => (
-                  <th key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                    End: {p.period_label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {cagrMetrics.map(meta => (
-                <tr key={meta.key} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>{meta.label}</td>
-                  {periodsData.map(p => {
-                    const m = p.growth[meta.key];
-                    return (
-                      <td
-                        key={p.period_id}
-                        onClick={() => m && onInspectMetric(m, p.period_label)}
-                        style={{
-                          textAlign: 'right',
-                          padding: '0.75rem 1.25rem',
-                          fontFamily: 'monospace',
-                          cursor: m ? 'pointer' : 'default'
-                        }}
-                      >
-                        {m ? m.formatted_value : '—'}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
 
 const WorkingCapitalSection: React.FC<SectionProps> = ({ periodsData, onInspectMetric }) => {
-  const latest = periodsData[0]?.working_capital;
+  const latestPeriod = periodsData[periodsData.length - 1] || periodsData[0];
+  const latest = latestPeriod?.working_capital;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -632,7 +627,7 @@ const WorkingCapitalSection: React.FC<SectionProps> = ({ periodsData, onInspectM
           padding: '1.25rem'
         }}>
           <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700 }}>
-            Cash Conversion Cycle Breakdown ({periodsData[0].period_label})
+            Cash Conversion Cycle Breakdown ({latestPeriod.period_label})
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
             <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem' }}>
@@ -705,7 +700,7 @@ const WorkingCapitalSection: React.FC<SectionProps> = ({ periodsData, onInspectM
                 <tr key={meta.key} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>{meta.label}</td>
                   {periodsData.map(p => {
-                    const m = p.working_capital[meta.key];
+                    const m = p.working_capital?.[meta.key];
                     return (
                       <td
                         key={p.period_id}
@@ -736,9 +731,9 @@ const CashQualitySection: React.FC<SectionProps> = ({ periodsData, onInspectMetr
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Overview Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-        {periodsData.slice(0, 2).map(p => {
-          const cfoPat = p.cash_quality['CFO_TO_PAT'];
-          const accrual = p.cash_quality['SLOAN_ACCRUAL_RATIO'];
+        {periodsData.slice(-2).reverse().map(p => {
+          const cfoPat = p.cash_quality?.['CFO_TO_PAT'];
+          const accrual = p.cash_quality?.['SLOAN_ACCRUAL_RATIO'];
           const isHighQuality = cfoPat?.value !== null && cfoPat?.value !== undefined && cfoPat.value >= 1.0;
 
           return (
@@ -804,7 +799,7 @@ const CashQualitySection: React.FC<SectionProps> = ({ periodsData, onInspectMetr
                 <tr key={meta.key} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>{meta.label}</td>
                   {periodsData.map(p => {
-                    const m = p.cash_quality[meta.key];
+                    const m = p.cash_quality?.[meta.key];
                     return (
                       <td
                         key={p.period_id}
@@ -830,10 +825,7 @@ const CashQualitySection: React.FC<SectionProps> = ({ periodsData, onInspectMetr
   );
 };
 
-const DuPontSection: React.FC<{
-  periodsDuPont: DuPontDecompositionResult[];
-  onInspectMetric: (metric: CalculatedMetric, periodLabel: string) => void;
-}> = ({ periodsDuPont, onInspectMetric }) => {
+const DuPontSection: React.FC<{ periodsData: PeriodFundamentalAnalysis[] }> = ({ periodsData }) => {
   const [stepMode, setStepMode] = useState<'3_STEP' | '5_STEP'>('3_STEP');
 
   return (
@@ -884,8 +876,8 @@ const DuPontSection: React.FC<{
           fontWeight: 700
         }}>
           {stepMode === '3_STEP'
-            ? 'ROE = Net Profit Margin × Asset Turnover × Equity Multiplier'
-            : 'ROE = Tax Burden × Interest Burden × Operating Margin × Asset Turnover × Equity Multiplier'}
+            ? 'ROE = Net Profit Margin × Asset Turnover × Financial Leverage'
+            : 'ROE = Tax Burden × Interest Burden × Operating Margin × Asset Turnover × Financial Leverage'}
         </div>
       </div>
 
@@ -903,7 +895,7 @@ const DuPontSection: React.FC<{
                 <th style={{ textAlign: 'left', padding: '0.75rem 1.25rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                   Decomposition Component
                 </th>
-                {periodsDuPont.map(p => (
+                {periodsData.map(p => (
                   <th key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                     {p.period_label}
                   </th>
@@ -915,37 +907,25 @@ const DuPontSection: React.FC<{
                 <>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Net Profit Margin (%)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => onInspectMetric(p.step_3.net_profit_margin, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_3.net_profit_margin.formatted_value}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_3step?.net_profit_margin ? `${(p.dupont.dupont_3step.net_profit_margin * 100).toFixed(2)}%` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Asset Turnover (x)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => onInspectMetric(p.step_3.asset_turnover, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_3.asset_turnover.formatted_value}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_3step?.asset_turnover ? `${p.dupont.dupont_3step.asset_turnover.toFixed(2)}x` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Financial Leverage (Equity Multiplier x)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => onInspectMetric(p.step_3.equity_multiplier, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_3.equity_multiplier.formatted_value}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_3step?.financial_leverage ? `${p.dupont.dupont_3step.financial_leverage.toFixed(2)}x` : '—'}
                       </td>
                     ))}
                   </tr>
@@ -953,13 +933,9 @@ const DuPontSection: React.FC<{
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
                       Computed Return on Equity (ROE %)
                     </td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => onInspectMetric(p.step_3.computed_roe, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', fontWeight: 800, color: 'var(--accent-primary)', cursor: 'pointer' }}
-                      >
-                        {p.step_3.computed_roe.formatted_value}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', fontWeight: 800, color: 'var(--accent-primary)' }}>
+                        {p.dupont?.dupont_3step?.roe_calculated ? `${p.dupont.dupont_3step.roe_calculated.toFixed(2)}%` : '—'}
                       </td>
                     ))}
                   </tr>
@@ -968,61 +944,41 @@ const DuPontSection: React.FC<{
                 <>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Tax Burden (PAT / EBT)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.tax_burden, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.tax_burden.formatted_value || '—'}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_5step?.tax_burden ? `${p.dupont.dupont_5step.tax_burden.toFixed(3)}` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Interest Burden (EBT / EBIT)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.interest_burden, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.interest_burden.formatted_value || '—'}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_5step?.interest_burden ? `${p.dupont.dupont_5step.interest_burden.toFixed(3)}` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Operating Margin (EBIT / Revenue %)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.operating_margin, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.operating_margin.formatted_value || '—'}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_5step?.operating_margin ? `${(p.dupont.dupont_5step.operating_margin * 100).toFixed(2)}%` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Asset Turnover (x)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.asset_turnover, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.asset_turnover.formatted_value || '—'}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_5step?.asset_turnover ? `${p.dupont.dupont_5step.asset_turnover.toFixed(2)}x` : '—'}
                       </td>
                     ))}
                   </tr>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Equity Multiplier (x)</td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.equity_multiplier, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.equity_multiplier.formatted_value || '—'}
+                    <td style={{ padding: '0.75rem 1.25rem', fontWeight: 500 }}>Financial Leverage (Equity Multiplier x)</td>
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace' }}>
+                        {p.dupont?.dupont_5step?.financial_leverage ? `${p.dupont.dupont_5step.financial_leverage.toFixed(2)}x` : '—'}
                       </td>
                     ))}
                   </tr>
@@ -1030,13 +986,9 @@ const DuPontSection: React.FC<{
                     <td style={{ padding: '0.75rem 1.25rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
                       5-Step Computed ROE (%)
                     </td>
-                    {periodsDuPont.map(p => (
-                      <td
-                        key={p.period_id}
-                        onClick={() => p.step_5 && onInspectMetric(p.step_5.computed_roe, p.period_label)}
-                        style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', fontWeight: 800, color: 'var(--accent-primary)', cursor: 'pointer' }}
-                      >
-                        {p.step_5?.computed_roe.formatted_value || '—'}
+                    {periodsData.map(p => (
+                      <td key={p.period_id} style={{ textAlign: 'right', padding: '0.75rem 1.25rem', fontFamily: 'monospace', fontWeight: 800, color: 'var(--accent-primary)' }}>
+                        {p.dupont?.dupont_5step?.roe_calculated ? `${p.dupont.dupont_5step.roe_calculated.toFixed(2)}%` : '—'}
                       </td>
                     ))}
                   </tr>
@@ -1051,16 +1003,15 @@ const DuPontSection: React.FC<{
 };
 
 const CommonSizeSection: React.FC<{
-  data: CompanyCommonSizeResponse;
+  periodsData: PeriodFundamentalAnalysis[];
   kind: 'INCOME_STATEMENT' | 'BALANCE_SHEET';
   onKindChange: (k: 'INCOME_STATEMENT' | 'BALANCE_SHEET') => void;
-}> = ({ data, kind, onKindChange }) => {
-  const periods = data.periods_common_size;
-  if (periods.length === 0) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No common-size data available.</div>;
-  }
+}> = ({ periodsData, kind, onKindChange }) => {
+  const firstPeriodStmt = kind === 'INCOME_STATEMENT'
+    ? periodsData[0]?.common_size_income
+    : periodsData[0]?.common_size_balance;
 
-  const firstPeriodItems = periods[0].items;
+  const items = firstPeriodStmt?.items || [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1106,7 +1057,7 @@ const CommonSizeSection: React.FC<{
                 <th style={{ textAlign: 'left', padding: '0.75rem 1.25rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                   Line Item
                 </th>
-                {periods.map(p => (
+                {periodsData.map(p => (
                   <th key={p.period_id} colSpan={2} style={{ textAlign: 'center', padding: '0.75rem 0.5rem', fontWeight: 600, color: 'var(--text-muted)', borderLeft: '1px solid var(--border-color)' }}>
                     {p.period_label}
                   </th>
@@ -1114,7 +1065,7 @@ const CommonSizeSection: React.FC<{
               </tr>
               <tr style={{ backgroundColor: 'rgba(255, 255, 255, 0.01)', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem' }}>
                 <th style={{ padding: '0.35rem 1.25rem' }}></th>
-                {periods.map(p => (
+                {periodsData.map(p => (
                   <React.Fragment key={p.period_id}>
                     <th style={{ textAlign: 'right', padding: '0.35rem 0.5rem', color: 'var(--text-muted)', borderLeft: '1px solid var(--border-color)' }}>
                       ₹ Cr
@@ -1127,52 +1078,47 @@ const CommonSizeSection: React.FC<{
               </tr>
             </thead>
             <tbody>
-              {firstPeriodItems.map((item, idx) => {
-                const isH = item.is_header;
-                return (
-                  <tr
-                    key={item.item_key}
-                    style={{
-                      borderBottom: '1px solid var(--border-color)',
-                      backgroundColor: isH ? 'rgba(59, 130, 246, 0.04)' : 'transparent',
-                      fontWeight: isH ? 700 : 400
-                    }}
-                  >
-                    <td style={{
-                      padding: '0.65rem 1.25rem',
-                      paddingLeft: `${1.25 + item.level * 1}rem`,
-                      color: isH ? 'var(--accent-primary)' : 'inherit'
-                    }}>
-                      {item.item_label}
-                    </td>
-                    {periods.map(p => {
-                      const curItem = p.items[idx] || item;
-                      return (
-                        <React.Fragment key={p.period_id}>
-                          <td style={{
-                            textAlign: 'right',
-                            padding: '0.65rem 0.5rem',
-                            fontFamily: 'monospace',
-                            borderLeft: '1px solid var(--border-color)',
-                            color: 'var(--text-muted)'
-                          }}>
-                            {curItem.raw_value.toLocaleString('en-IN', { maximumFractionDigits: 1 })}
-                          </td>
-                          <td style={{
-                            textAlign: 'right',
-                            padding: '0.65rem 0.75rem',
-                            fontFamily: 'monospace',
-                            fontWeight: isH ? 700 : 500,
-                            color: isH ? 'var(--accent-primary)' : 'inherit'
-                          }}>
-                            {curItem.percent_of_base.toFixed(2)}%
-                          </td>
-                        </React.Fragment>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+              {items.map((item, idx) => (
+                <tr
+                  key={item.line_item_key}
+                  style={{
+                    borderBottom: '1px solid var(--border-color)',
+                  }}
+                >
+                  <td style={{
+                    padding: '0.65rem 1.25rem',
+                    fontWeight: 500
+                  }}>
+                    {item.line_item_label}
+                  </td>
+                  {periodsData.map(p => {
+                    const stmt = kind === 'INCOME_STATEMENT' ? p.common_size_income : p.common_size_balance;
+                    const curItem = stmt?.items?.[idx] || item;
+                    return (
+                      <React.Fragment key={p.period_id}>
+                        <td style={{
+                          textAlign: 'right',
+                          padding: '0.65rem 0.5rem',
+                          fontFamily: 'monospace',
+                          borderLeft: '1px solid var(--border-color)',
+                          color: 'var(--text-muted)'
+                        }}>
+                          {curItem.raw_value.toLocaleString('en-IN', { maximumFractionDigits: 1 })}
+                        </td>
+                        <td style={{
+                          textAlign: 'right',
+                          padding: '0.65rem 0.75rem',
+                          fontFamily: 'monospace',
+                          fontWeight: 600,
+                          color: 'var(--accent-primary)'
+                        }}>
+                          {curItem.percentage_of_base.toFixed(2)}%
+                        </td>
+                      </React.Fragment>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -1307,7 +1253,7 @@ const MetricLineageDrawer: React.FC<{
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(metric.inputs).map(([key, val]) => (
+                  {metric.inputs && Object.entries(metric.inputs).map(([key, val]) => (
                     <tr key={key} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace' }}>{key}</td>
                       <td style={{ textAlign: 'right', padding: '0.5rem 0.75rem', fontFamily: 'monospace', fontWeight: 600 }}>
