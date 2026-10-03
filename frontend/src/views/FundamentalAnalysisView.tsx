@@ -25,7 +25,7 @@ type ActiveAnalysisTab = 'profitability' | 'growth' | 'working_capital' | 'cash_
 
 export const FundamentalAnalysisView: React.FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedTicker, setSelectedTicker] = useState<string>('INFY');
+  const [selectedTicker, setSelectedTicker] = useState<string>('RELIANCE');
   const [statementType, setStatementType] = useState<'CONSOLIDATED' | 'STANDALONE'>('CONSOLIDATED');
   const [activeTab, setActiveTab] = useState<ActiveAnalysisTab>('profitability');
   const [commonSizeKind, setCommonSizeKind] = useState<'INCOME_STATEMENT' | 'BALANCE_SHEET'>('INCOME_STATEMENT');
