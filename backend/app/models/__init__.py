@@ -13,6 +13,7 @@ from app.models.financial_statements import (
 from app.models.corporate_actions import CorporateAction, ActionType, ShareCountHistory
 from app.models.provenance import DataProvenance
 from app.models.validation import ValidationResult, ValidationStatus, ValidationCategory
+from app.models.fundamental_analysis import FundamentalMetricRecord
 
 __all__ = [
     "Base",
@@ -37,4 +38,5 @@ __all__ = [
     "ValidationResult",
     "ValidationStatus",
     "ValidationCategory",
+    "FundamentalMetricRecord",
 ]
