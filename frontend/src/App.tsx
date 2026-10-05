@@ -5,11 +5,12 @@ import { ArchitectureView } from './views/ArchitectureView';
 import { DataPipelineView } from './views/DataPipelineView';
 import { FinancialDataEngineView } from './views/FinancialDataEngineView';
 import { FundamentalAnalysisView } from './views/FundamentalAnalysisView';
+import { ForensicIntelligenceView } from './views/ForensicIntelligenceView';
 import { ApiService } from './services/api';
 import { HealthResponse } from './types/api';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<string>('fundamental');
+  const [currentTab, setCurrentTab] = useState<string>('forensics');
   const [healthData, setHealthData] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function App() {
       systemStatus={systemStatus}
       version={version}
     >
+      {currentTab === 'forensics' && <ForensicIntelligenceView />}
       {currentTab === 'fundamental' && <FundamentalAnalysisView />}
       {currentTab === 'financials' && <FinancialDataEngineView />}
       {currentTab === 'health' && (
@@ -56,6 +58,7 @@ export function App() {
     </AppLayout>
   );
 }
+
 
 export default App;
 

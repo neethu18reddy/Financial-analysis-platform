@@ -11,6 +11,7 @@ import {
   CompanyFundamentalResponse,
   CompanyDuPontResponse,
   CompanyCommonSizeResponse,
+  CompanyForensicResponse,
 } from '../types/api';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -134,5 +135,76 @@ export const ApiService = {
       `/companies/${encodeURIComponent(identifier)}/analysis/common-size?${params.toString()}`
     );
   },
+
+  async getForensicSummary(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<CompanyForensicResponse> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<CompanyForensicResponse>(
+      `/companies/${encodeURIComponent(identifier)}/forensics/summary?${params.toString()}`
+    );
+  },
+
+  async getBeneishAnalysis(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<any>(
+      `/companies/${encodeURIComponent(identifier)}/forensics/beneish?${params.toString()}`
+    );
+  },
+
+  async getPiotroskiAnalysis(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<any>(
+      `/companies/${encodeURIComponent(identifier)}/forensics/piotroski?${params.toString()}`
+    );
+  },
+
+  async getAltmanAnalysis(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<any>(
+      `/companies/${encodeURIComponent(identifier)}/forensics/altman?${params.toString()}`
+    );
+  },
+
+  async getForensicSignals(
+    identifier: string,
+    statementType: 'CONSOLIDATED' | 'STANDALONE' = 'CONSOLIDATED',
+    limitPeriods: number = 5
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      statement_type: statementType,
+      limit_periods: limitPeriods.toString(),
+    });
+    return fetchJson<any>(
+      `/companies/${encodeURIComponent(identifier)}/forensics/signals?${params.toString()}`
+    );
+  },
 };
+
 

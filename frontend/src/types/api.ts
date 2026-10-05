@@ -381,4 +381,141 @@ export interface CompanyCommonSizeResponse {
   }>;
 }
 
+export type ForensicRiskLevel = 'LOW' | 'MODERATE' | 'ELEVATED' | 'HIGH' | 'CRITICAL' | 'INFO' | 'NOT_APPLICABLE';
+
+export type SignalCategory =
+  | 'MANIPULATION_RISK'
+  | 'FINANCIAL_HEALTH'
+  | 'BANKRUPTCY_RISK'
+  | 'ACCRUAL_QUALITY'
+  | 'WORKING_CAPITAL'
+  | 'REVENUE_RECOGNITION'
+  | 'DEBT_SOLVENCY'
+  | 'MARGIN_ANOMALY'
+  | 'AUDIT_GOVERNANCE';
+
+export interface ForensicSignal {
+  signal_key: string;
+  signal_label: string;
+  category: SignalCategory;
+  risk_level: ForensicRiskLevel;
+  value?: number | null;
+  formatted_value: string;
+  benchmark_threshold: string;
+  formula_expression: string;
+  inputs: Record<string, any>;
+  interpretation: string;
+  is_applicable: boolean;
+  inapplicable_reason?: string | null;
+  limitations: string;
+  methodology_version: string;
+}
+
+export interface BeneishVariable {
+  key: string;
+  name: string;
+  value?: number | null;
+  coefficient: number;
+  contribution?: number | null;
+  formula: string;
+  interpretation: string;
+}
+
+export interface BeneishMScoreResult {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  m_score?: number | null;
+  risk_classification: ForensicRiskLevel;
+  is_applicable: boolean;
+  inapplicable_reason?: string | null;
+  threshold: number;
+  probability_of_manipulation_flag: string;
+  variables: Record<string, BeneishVariable>;
+  formula_expression: string;
+  interpretation: string;
+  limitations: string;
+  methodology_version: string;
+}
+
+export interface PiotroskiSignal {
+  key: string;
+  category: string;
+  name: string;
+  passed: boolean;
+  score: number;
+  description: string;
+  formula: string;
+  inputs: Record<string, any>;
+}
+
+export interface PiotroskiFScoreResult {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  f_score: number;
+  max_score: number;
+  risk_classification: ForensicRiskLevel;
+  financial_health_label: string;
+  profitability_score: number;
+  leverage_liquidity_score: number;
+  operating_efficiency_score: number;
+  signals: PiotroskiSignal[];
+  is_applicable: boolean;
+  inapplicable_reason?: string | null;
+  interpretation: string;
+  limitations: string;
+  methodology_version: string;
+}
+
+export interface AltmanZScoreResult {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  model_type: string;
+  z_score?: number | null;
+  zone: string;
+  risk_classification: ForensicRiskLevel;
+  safe_threshold: number;
+  distress_threshold: number;
+  components: Record<string, number>;
+  formula_expression: string;
+  is_applicable: boolean;
+  inapplicable_reason?: string | null;
+  interpretation: string;
+  limitations: string;
+  methodology_version: string;
+}
+
+export interface PeriodForensicScorecard {
+  period_id: number;
+  period_label: string;
+  fiscal_year: number;
+  end_date: string;
+  statement_type: string;
+  overall_risk_level: ForensicRiskLevel;
+  risk_summary_text: string;
+  beneish_m_score?: BeneishMScoreResult | null;
+  piotroski_f_score?: PiotroskiFScoreResult | null;
+  altman_z_score?: AltmanZScoreResult | null;
+  screening_signals: ForensicSignal[];
+  anomalous_signals_count: number;
+  total_signals_evaluated: number;
+}
+
+export interface CompanyForensicResponse {
+  company_id: number;
+  ticker: string;
+  legal_name: string;
+  sector: string;
+  industry: string;
+  statement_type: string;
+  overall_forensic_stance: string;
+  latest_scorecard?: PeriodForensicScorecard | null;
+  historical_scorecards: PeriodForensicScorecard[];
+  sector_applicability_notes: string[];
+  methodology_version: string;
+}
+
+
 
