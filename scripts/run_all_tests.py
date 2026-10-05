@@ -31,16 +31,16 @@ def run_command(command: str, description: str, cwd=None) -> bool:
 
 def main():
     print("\n========================================================")
-    print("PHASE 2 TEST SUITE: FUNDAMENTAL ANALYSIS ENGINE & UI")
+    print("PHASE 3 TEST SUITE: FUNDAMENTAL & FORENSIC INTELLIGENCE")
     print("========================================================")
 
     results = []
 
-    # 1. Backend Pytest suite (Validation, Models, Fundamental Engines, API, Math)
+    # 1. Backend Pytest suite (Validation, Models, Fundamental & Forensic Engines, API, Math)
     results.append(
         run_command(
             ".venv\\Scripts\\pytest tests/backend -v",
-            "Backend Unit & Integration Tests (FastAPI, DB, Fundamental Engines, DuPont, Ratios)",
+            "Backend Unit & Integration Tests (FastAPI, DB, Fundamentals, Beneish, Piotroski, Altman, Signals)",
         )
     )
 
@@ -48,7 +48,7 @@ def main():
     results.append(
         run_command(
             "npm run build",
-            "Frontend TypeScript Compile & Production Bundle Build",
+            "Frontend TypeScript Compile & Production Bundle Build (Vite + React)",
             cwd="frontend",
         )
     )
@@ -61,7 +61,7 @@ def main():
     print(f"Total Suites: {total} | Passed: {passed} | Failed: {total - passed}")
 
     if all(results):
-        print("\n[ALL PASS] ALL PHASE 2 TESTS COMPLETED SUCCESSFULLY!")
+        print("\n[ALL PASS] ALL PHASE 3 TESTS COMPLETED SUCCESSFULLY!")
         sys.exit(0)
     else:
         print("\n[FAIL] SOME TESTS FAILED. PLEASE FIX ISSUES BEFORE CONTINUING.")
