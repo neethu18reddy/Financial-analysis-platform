@@ -14,6 +14,18 @@ from app.models.corporate_actions import CorporateAction, ActionType, ShareCount
 from app.models.provenance import DataProvenance
 from app.models.validation import ValidationResult, ValidationStatus, ValidationCategory
 from app.models.fundamental_analysis import FundamentalMetricRecord
+from app.models.forensic import (
+    ForensicRiskLevel,
+    SignalCategory,
+    ForensicSignal,
+    BeneishVariable,
+    BeneishMScoreResult,
+    PiotroskiSignal,
+    PiotroskiFScoreResult,
+    AltmanZScoreResult,
+    PeriodForensicScorecard,
+    CompanyForensicResponse,
+)
 
 __all__ = [
     "Base",
@@ -39,4 +51,15 @@ __all__ = [
     "ValidationStatus",
     "ValidationCategory",
     "FundamentalMetricRecord",
+    "ForensicRiskLevel",
+    "SignalCategory",
+    "ForensicSignal",
+    "BeneishVariable",
+    "BeneishMScoreResult",
+    "PiotroskiSignal",
+    "PiotroskiFScoreResult",
+    "AltmanZScoreResult",
+    "PeriodForensicScorecard",
+    "CompanyForensicResponse",
 ]
+
