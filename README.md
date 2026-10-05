@@ -9,14 +9,15 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_Async-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Phase 2 Checkpoint](https://img.shields.io/badge/Phase_2-Fundamental_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_2_checkpoint.md)
-[![Test Coverage](https://img.shields.io/badge/Test_Suite-38_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Phase 3 Checkpoint](https://img.shields.io/badge/Phase_3-Forensic_Intelligence_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_3_checkpoint.md)
+[![Test Coverage](https://img.shields.io/badge/Test_Suite-50_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
 <p align="center">
   <a href="#-executive-summary">Executive Summary</a> •
   <a href="#-the-cardinal-law-of-financial-computing">Core Law</a> •
-  <a href="#-phase-2-fundamental-analysis-engine">Phase 2 Engine</a> •
-  <a href="#-phase-1-financial-data-engine">Phase 1 Engine</a> •
+  <a href="#-phase-3-forensic-intelligence-engine">Phase 3 Forensics</a> •
+  <a href="#-phase-2-fundamental-analysis-engine">Phase 2 Fundamentals</a> •
+  <a href="#-phase-1-financial-data-engine">Phase 1 Data Engine</a> •
   <a href="#-system-architecture">Architecture</a> •
   <a href="#-data-provenance--audit-trail">Provenance</a> •
   <a href="#-deterministic-validation">Validation</a> •
@@ -52,6 +53,32 @@ This platform solves this fundamental problem through a **hard computational bou
 ```
 
 > **Cardinal Rule:** The LLM is **NOT** a source of truth or a calculator. Mathematical correctness is guaranteed by code, verified by deterministic tests, and backed by immutable audit lineage.
+
+---
+
+## 🕵️ Phase 3: Forensic Intelligence Engine Capabilities
+
+Phase 3 introduces institutional-grade forensic screening, statistical manipulation detection, and distress modeling:
+
+1. **Beneish 8-Variable M-Score Model:**
+   - Detects earnings distortion & aggressive accounting ($DSRI, GMI, AQI, SGI, DEPI, SGAI, TATA, LVGI$).
+   - Statistical cutoff: $M > -1.78$ flagged as anomalous earnings manipulation risk.
+   - Built-in financial/banking sector inapplicability guardrails.
+2. **Piotroski 9-Point F-Score Matrix:**
+   - Binary scoring evaluating fundamental momentum across **Profitability** (4 pts), **Leverage/Liquidity** (3 pts), and **Operating Efficiency** (2 pts).
+   - High-conviction classification ($8-9$: Strong, $5-7$: Stable, $0-4$: Weak/Distressed).
+3. **Emerging Market Altman Z''-Score:**
+   - 4-variable solvency model tailored for Indian corporate balance sheets.
+   - Classification zones: Safe ($Z'' > 2.60$), Grey ($1.10 \le Z'' \le 2.60$), Distress ($Z'' < 1.10$).
+4. **Granular Anomaly Screening Matrix:**
+   - Sloan Balance Sheet Accruals vs Total Assets.
+   - Channel Stuffing / Trade Receivables vs Revenue divergence.
+   - Inventory Buildup vs COGS divergence.
+   - Debt Escalation vs Operating Profit (EBIT).
+   - Non-Operating Other Income dependency & Effective Tax Rate anomalies.
+5. **Zero-Accusation Compliance & Lineage:**
+   - Standardized terminology (`ANOMALY`, `POTENTIAL_CONCERN`, `REQUIRES_INVESTIGATION`).
+   - Interactive Forensic Lineage & Formula Inspector modal on frontend.
 
 ---
 
