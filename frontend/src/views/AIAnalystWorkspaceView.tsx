@@ -13,6 +13,9 @@ import {
   ChevronRight,
   Target,
   FileCheck2,
+  Copy,
+  Check,
+  Search,
 } from 'lucide-react';
 import { api } from '../services/api';
 import {
@@ -60,10 +63,12 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
   // Research Report State
   const [researchReport, setResearchReport] = useState<CompanyResearchReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
+  const [copiedReport, setCopiedReport] = useState(false);
 
   // Watchlist State
   const [watchlist, setWatchlist] = useState<WatchlistItemDTO[]>([]);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
+  const [watchlistFilter, setWatchlistFilter] = useState('');
   const [newTicker, setNewTicker] = useState('');
   const [newNotes, setNewNotes] = useState('');
 
@@ -155,6 +160,18 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
     }
   };
 
+  const handleCopyReport = () => {
+    if (!researchReport) return;
+    const text = `# Equity Research Report: ${researchReport.legal_name} (${researchReport.ticker})\n\n` +
+      `Sector: ${researchReport.sector} | CMP: ₹${researchReport.current_market_price.toFixed(2)}\n` +
+      `Intrinsic Fair Value: ₹${researchReport.valuation_synthesis?.composite_central_fair_value?.toFixed(2) || 'N/A'}\n\n` +
+      `## Executive Summary\n${researchReport.executive_summary}\n\n` +
+      `## Business Overview\n${researchReport.business_overview}\n`;
+    navigator.clipboard.writeText(text);
+    setCopiedReport(true);
+    setTimeout(() => setCopiedReport(false), 2500);
+  };
+
   const loadWatchlist = async () => {
     setLoadingWatchlist(true);
     try {
@@ -189,35 +206,42 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
     }
   };
 
+  const filteredWatchlist = watchlist.filter(
+    (item) =>
+      item.ticker.toLowerCase().includes(watchlistFilter.toLowerCase()) ||
+      item.company_name.toLowerCase().includes(watchlistFilter.toLowerCase()) ||
+      item.sector.toLowerCase().includes(watchlistFilter.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
-      {/* Header & Subsystem Description */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
+      {/* Top Banner & Company Focus Switcher */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-slate-900/70 p-6 rounded-2xl border border-slate-800 shadow-lg backdrop-blur-sm">
         <div className="flex items-center space-x-4">
-          <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30 text-indigo-400">
+          <div className="p-3.5 bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 rounded-xl border border-cyan-500/30 text-cyan-400 shadow-sm">
             <Bot className="w-8 h-8" />
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl font-black text-white tracking-tight">
                 AI Analyst & Research Product
               </h1>
-              <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">
                 Phase 7 Final Engine
               </span>
             </div>
-            <p className="text-sm text-slate-400 mt-1">
-              Zero-hallucination institutional intelligence, verifiable statutory citations, historical Said-vs-Did scorecard, Point-in-Time temporal guardrails, and anomaly alerts.
+            <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Zero-hallucination institutional intelligence, verifiable statutory citations, historical Said-vs-Did credibility tracking, Point-in-Time temporal guardrails, and anomaly alerts.
             </p>
           </div>
         </div>
 
-        {/* Company Selector */}
+        {/* Company Dropdown */}
         <div className="flex items-center gap-3">
           <div className="relative">
             <select
               aria-label="Select Company for AI Analysis"
-              className="appearance-none bg-slate-950 text-white font-medium text-sm pl-4 pr-10 py-2.5 rounded-xl border border-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="appearance-none bg-slate-950 text-white font-semibold text-sm pl-4 pr-10 py-2.5 rounded-xl border border-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm cursor-pointer"
               value={selectedCompany?.id || ''}
               onChange={(e) => {
                 const comp = companies.find((c) => c.id === parseInt(e.target.value));
@@ -239,9 +263,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
       <div className="flex border-b border-slate-800 space-x-2">
         <button
           onClick={() => setActiveTab('analyst')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === 'analyst'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10 rounded-t-lg'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
@@ -250,9 +274,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
         </button>
         <button
           onClick={() => setActiveTab('said_did')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === 'said_did'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10 rounded-t-lg'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
@@ -261,9 +285,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
         </button>
         <button
           onClick={() => setActiveTab('pit')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === 'pit'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10 rounded-t-lg'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
@@ -275,9 +299,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
             setActiveTab('report');
             if (selectedCompany) loadResearchReport(selectedCompany.id);
           }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === 'report'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10 rounded-t-lg'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
@@ -289,9 +313,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
             setActiveTab('watchlist');
             loadWatchlist();
           }}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === 'watchlist'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/10 rounded-t-lg'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
         >
@@ -308,10 +332,10 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
           {/* Query & Claims Panel */}
           <div className="lg:col-span-2 space-y-6">
             {/* Input Box */}
-            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <label className="text-sm font-semibold text-slate-200 flex items-center justify-between">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-md">
+              <label className="text-sm font-bold text-slate-200 flex items-center justify-between">
                 <span>Ask Analytical Financial Question ({selectedCompany?.ticker})</span>
-                <span className="text-xs text-indigo-400 font-normal flex items-center gap-1">
+                <span className="text-xs text-indigo-400 font-medium flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   Mandatory Citation Grounding Enforced
                 </span>
@@ -323,12 +347,12 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                   value={queryText}
                   onChange={(e) => setQueryText(e.target.value)}
                   placeholder="e.g. Why did ROCE decline? What did management state about capex & 5G rollout?"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                 />
                 <button
                   onClick={() => handleRunQuery()}
                   disabled={isQuerying || !queryText.trim()}
-                  className="absolute right-3 bottom-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition"
+                  className="absolute right-3 bottom-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition shadow"
                 >
                   {isQuerying ? (
                     <>
@@ -346,7 +370,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
               {/* Quick Suggestion Pills */}
               <div className="space-y-1.5">
-                <span className="text-xs text-slate-400 font-medium">Suggested queries:</span>
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                  Suggested inquiries:
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {suggestedPrompts.map((prompt: string, idx: number) => (
                     <button
@@ -367,15 +393,15 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
             {/* Answer Display */}
             {analystResponse && (
-              <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-6">
+              <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-md">
                 {/* Meta Header */}
                 <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
+                    <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-white">
+                      <h3 className="text-base font-bold text-white">
                         {analystResponse.company_name} ({analystResponse.ticker})
                       </h3>
                       <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
@@ -387,8 +413,8 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                   </div>
 
                   <div className="text-right">
-                    <div className="text-xs text-slate-400">Confidence Score</div>
-                    <div className="text-lg font-bold text-emerald-400">
+                    <div className="text-xs text-slate-400 font-medium">Confidence Score</div>
+                    <div className="text-xl font-black text-emerald-400 font-mono">
                       {Math.round(analystResponse.data_confidence_score * 100)}%
                     </div>
                   </div>
@@ -396,31 +422,31 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
                 {/* Executive Summary */}
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Executive Summary & Analysis
                   </h4>
-                  <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed font-sans">
+                  <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed font-sans shadow-inner">
                     {analystResponse.executive_summary}
                   </div>
                 </div>
 
                 {/* Key Claims Breakdown */}
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
                     Extracted Analytical Claims & Verification Lineage ({analystResponse.key_claims.length})
                   </h4>
                   <div className="space-y-3">
                     {analystResponse.key_claims.map((claim: AnalyticalClaim, idx: number) => (
                       <div
                         key={idx}
-                        className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-2 hover:border-slate-700 transition"
+                        className="p-4 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-2 hover:border-slate-700 transition"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-slate-200 leading-snug">
                             {claim.statement}
                           </p>
                           <span
-                            className={`px-2.5 py-0.5 text-xs font-semibold rounded-md uppercase whitespace-nowrap ${
+                            className={`px-2.5 py-0.5 text-xs font-bold rounded-md uppercase whitespace-nowrap ${
                               claim.grounding_status === 'VERIFIED_CITATION'
                                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 : claim.grounding_status === 'DERIVED_METRIC'
@@ -440,7 +466,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                           </div>
                         )}
                         {claim.rejection_reason && (
-                          <div className="text-xs text-red-400 bg-red-950/40 p-2 rounded-lg border border-red-900/50">
+                          <div className="text-xs text-red-400 bg-red-950/40 p-2.5 rounded-lg border border-red-900/50">
                             Sanitizer Notice: {claim.rejection_reason}
                           </div>
                         )}
@@ -450,8 +476,8 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                 </div>
 
                 {/* Caveats & Compliance */}
-                <div className="p-3.5 bg-amber-950/20 border border-amber-900/40 rounded-xl space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+                <div className="p-4 bg-amber-950/20 border border-amber-900/40 rounded-xl space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
                     <AlertTriangle className="w-4 h-4" />
                     Regulatory & Methodology Limitations
                   </div>
@@ -467,24 +493,24 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
           {/* Right Citation Explorer */}
           <div className="space-y-6">
-            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-md">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <FileText className="w-4 h-4 text-indigo-400" />
                   Supporting Statutory Evidence
                 </h3>
-                <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">
+                <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
                   {analystResponse?.supporting_citations.length || 0} Citations
                 </span>
               </div>
 
               {!analystResponse ? (
-                <div className="text-center py-12 text-slate-500 text-xs">
-                  Run a query to retrieve verified annual report passages and citations.
+                <div className="text-center py-16 text-slate-500 text-xs">
+                  Run an analytical question to retrieve verified annual report citations.
                 </div>
               ) : analystResponse.supporting_citations.length === 0 ? (
-                <div className="text-center py-8 text-slate-500 text-xs">
-                  No statutory PDF citations matched for this structured prompt.
+                <div className="text-center py-10 text-slate-500 text-xs">
+                  No statutory PDF citations matched for this query.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -494,19 +520,19 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                       onClick={() => setSelectedCitation(cit)}
                       className={`p-3.5 rounded-xl border cursor-pointer transition ${
                         selectedCitation?.exact_quote === cit.exact_quote
-                          ? 'bg-indigo-950/40 border-indigo-500/60'
+                          ? 'bg-indigo-950/40 border-indigo-500/60 shadow-md'
                           : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-semibold text-indigo-300">
+                        <span className="font-bold text-indigo-300">
                           {cit.ticker} FY{cit.fiscal_year} (p. {cit.page_number})
                         </span>
-                        <span className="text-emerald-400 font-mono">
+                        <span className="text-emerald-400 font-mono font-bold">
                           {Math.round(cit.relevance_score * 100)}% Match
                         </span>
                       </div>
-                      <div className="text-xs text-slate-400 font-medium mb-1">
+                      <div className="text-xs text-slate-400 font-semibold mb-1">
                         Section: {cit.section_title}
                       </div>
                       <p className="text-xs text-slate-300 line-clamp-3 italic">
@@ -518,17 +544,17 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
               )}
 
               {selectedCitation && (
-                <div className="p-4 bg-slate-950 rounded-xl border border-indigo-500/30 space-y-2 mt-4">
-                  <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+                <div className="p-4 bg-slate-950 rounded-xl border border-indigo-500/30 space-y-2 mt-4 shadow-inner">
+                  <div className="text-xs font-bold text-indigo-400 flex items-center justify-between">
                     <span>Active Citation Provenance</span>
                     <span className="text-[10px] font-mono text-slate-400">
                       {selectedCitation.provenance_hash.slice(0, 12)}...
                     </span>
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed bg-slate-900/80 p-2.5 rounded border border-slate-800">
+                  <p className="text-xs text-slate-200 leading-relaxed bg-slate-900/90 p-3 rounded-lg border border-slate-800 italic">
                     "{selectedCitation.exact_quote}"
                   </p>
-                  <div className="text-[11px] text-slate-400 space-y-0.5">
+                  <div className="text-[11px] text-slate-400 space-y-1">
                     <div>Document: <strong className="text-slate-300">{selectedCitation.document_title}</strong></div>
                     <div>Page Number: <strong className="text-slate-300">{selectedCitation.page_number}</strong></div>
                     <div>Source Filing: <a href={selectedCitation.source_url || '#'} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">{selectedCitation.source_url || 'Statutory Filing'}</a></div>
@@ -545,7 +571,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
       {/* --------------------------------------------------------------------- */}
       {activeTab === 'said_did' && (
         <div className="space-y-6">
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-6">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-md">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -553,21 +579,21 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                   Management Guidance vs Outturn Credibility Tracker
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Tracks forward-looking statements in Annual Reports against multi-year actual financial outcomes.
+                  Tracks forward-looking commitments in Annual Reports against multi-year actual financial outcomes.
                 </p>
               </div>
 
               {saidVsDidData && (
                 <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <div className="text-xs text-slate-400">Commitments Tracked</div>
-                    <div className="text-base font-bold text-white">
+                    <div className="text-xs text-slate-400 font-semibold">Commitments Tracked</div>
+                    <div className="text-base font-bold text-white font-mono">
                       {saidVsDidData.total_commitments} Items
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-slate-400">Credibility Score</div>
-                    <div className="text-xl font-bold text-emerald-400">
+                    <div className="text-xs text-slate-400 font-semibold">Credibility Score</div>
+                    <div className="text-2xl font-black text-emerald-400 font-mono">
                       {saidVsDidData.credibility_score_pct.toFixed(1)}%
                     </div>
                   </div>
@@ -576,11 +602,11 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
             </div>
 
             {loadingSaidDid ? (
-              <div className="py-16 text-center text-slate-400 text-sm">
+              <div className="py-20 text-center text-slate-400 text-sm">
                 Evaluating statutory guidance records...
               </div>
             ) : !saidVsDidData || saidVsDidData.items.length === 0 ? (
-              <div className="py-12 text-center text-slate-500 text-sm">
+              <div className="py-16 text-center text-slate-500 text-sm">
                 No statutory guidance records available for {selectedCompany?.ticker}.
               </div>
             ) : (
@@ -588,11 +614,11 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                 {saidVsDidData.items.map((item: ManagementGuidanceItem, idx: number) => (
                   <div
                     key={idx}
-                    className="p-5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-4 hover:border-slate-700 transition"
+                    className="p-5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-4 hover:border-slate-700 transition shadow-sm"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg">
+                        <span className="px-2.5 py-1 text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg">
                           {item.category.replace('_', ' ')}
                         </span>
                         <span className="text-xs text-slate-400">
@@ -614,15 +640,15 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                         >
                           {item.delivery_status}
                         </span>
-                        <span className="text-xs font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-900/50">
+                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2.5 py-1 rounded border border-emerald-900/50">
                           Score: {Math.round(item.credibility_score * 100)}%
                         </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 bg-slate-900/90 rounded-lg border border-slate-800 space-y-1">
-                        <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                      <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <div className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
                           <Bot className="w-3.5 h-3.5 text-indigo-400" />
                           Management Stated Guidance / Commitment
                         </div>
@@ -631,8 +657,8 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                         </p>
                       </div>
 
-                      <div className="p-3 bg-slate-900/90 rounded-lg border border-slate-800 space-y-1">
-                        <div className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                      <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <div className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                           Actual Financial Outcome (Evaluation FY{item.evaluation_year})
                         </div>
@@ -642,7 +668,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-850 pt-2">
+                    <div className="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-850 pt-2.5">
                       <span>Source: <strong className="text-slate-300">{item.source_citation}</strong></span>
                       <span>Evaluation Year: FY{item.evaluation_year}</span>
                     </div>
@@ -659,7 +685,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
       {/* --------------------------------------------------------------------- */}
       {activeTab === 'pit' && (
         <div className="space-y-6">
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-6">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-md">
             <div>
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Clock className="w-5 h-5 text-indigo-400" />
@@ -671,16 +697,16 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
             </div>
 
             {/* Controls */}
-            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="p-5 bg-slate-950 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 items-end shadow-inner">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                <label className="text-xs font-bold text-slate-300 block mb-1.5 uppercase tracking-wider">
                   Historical Cut-off Fiscal Year
                 </label>
                 <select
                   aria-label="Historical Cut-off Fiscal Year"
                   value={pitYear}
                   onChange={(e) => setPitYear(parseInt(e.target.value))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
                 >
                   <option value={2023}>FY 2022-23 (FY23)</option>
                   <option value={2024}>FY 2023-24 (FY24)</option>
@@ -688,7 +714,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                <label className="text-xs font-bold text-slate-300 block mb-1.5 uppercase tracking-wider">
                   Custom Historical Question (Optional)
                 </label>
                 <input
@@ -696,14 +722,14 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                   value={pitQuestion}
                   onChange={(e) => setPitQuestion(e.target.value)}
                   placeholder="e.g. Evaluate leverage & capex as of FY23"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <button
                 onClick={handleRunPIT}
                 disabled={loadingPit}
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition"
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition shadow"
               >
                 {loadingPit ? (
                   <>
@@ -720,7 +746,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
             </div>
 
             {pitResponse && (
-              <div className="p-6 bg-slate-950/90 rounded-xl border border-slate-800 space-y-6">
+              <div className="p-6 bg-slate-950/90 rounded-xl border border-slate-800 space-y-6 shadow-md">
                 {/* Guardrail Status Banner */}
                 <div className="p-4 bg-emerald-950/30 border border-emerald-500/40 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -729,7 +755,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                       <div className="text-sm font-bold text-emerald-300">
                         Zero-Leakage Guardrail Enforced
                       </div>
-                      <div className="text-xs text-slate-300">
+                      <div className="text-xs text-slate-300 mt-0.5">
                         Simulated as of FY{pitResponse.as_of_year}. Discarded {pitResponse.future_data_excluded.length} future periods: [{pitResponse.future_data_excluded.join(', ')}].
                       </div>
                     </div>
@@ -741,17 +767,17 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
                 {/* Simulated AI Analyst Response */}
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                     Point-in-Time Historical Analyst Verdict
                   </h4>
-                  <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed font-sans">
+                  <div className="p-4 bg-slate-900/90 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed font-sans shadow-inner">
                     {pitResponse.historical_analyst_verdict.executive_summary}
                   </div>
                 </div>
 
                 {/* Key Claims as of that date */}
                 <div>
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
                     Historical Grounded Claims ({pitResponse.historical_analyst_verdict.key_claims.length})
                   </h4>
                   <div className="space-y-2">
@@ -761,7 +787,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                         className="p-3 bg-slate-900/80 rounded-lg border border-slate-800 flex items-center justify-between text-xs"
                       >
                         <span className="text-slate-200 font-medium">{claim.statement}</span>
-                        <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 rounded font-semibold">
+                        <span className="px-2.5 py-0.5 bg-indigo-500/20 text-indigo-400 rounded-md font-bold">
                           {claim.grounding_status}
                         </span>
                       </div>
@@ -779,7 +805,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
       {/* --------------------------------------------------------------------- */}
       {activeTab === 'report' && (
         <div className="space-y-6">
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-6">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-md">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -791,23 +817,34 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                 </p>
               </div>
 
-              <button
-                onClick={() => selectedCompany && loadResearchReport(selectedCompany.id)}
-                disabled={loadingReport}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition"
-              >
-                {loadingReport ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Regenerate Report
-                  </>
+              <div className="flex items-center gap-3">
+                {researchReport && (
+                  <button
+                    onClick={handleCopyReport}
+                    className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-slate-700"
+                  >
+                    {copiedReport ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedReport ? 'Copied to Clipboard!' : 'Copy Summary'}</span>
+                  </button>
                 )}
-              </button>
+                <button
+                  onClick={() => selectedCompany && loadResearchReport(selectedCompany.id)}
+                  disabled={loadingReport}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition shadow"
+                >
+                  {loadingReport ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Regenerate Report
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {loadingReport ? (
@@ -819,7 +856,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                 Select a company to generate the institutional research report.
               </div>
             ) : (
-              <div className="space-y-6 bg-slate-950 p-8 rounded-2xl border border-slate-800">
+              <div className="space-y-6 bg-slate-950 p-8 rounded-2xl border border-slate-800 shadow-lg">
                 {/* Report Header */}
                 <div className="border-b border-slate-800 pb-6">
                   <div className="flex items-center justify-between">
@@ -832,13 +869,13 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-400">Current Market Price</div>
-                      <div className="text-2xl font-bold text-white font-mono">
+                      <div className="text-xs text-slate-400 font-semibold">Current Market Price</div>
+                      <div className="text-2xl font-black text-white font-mono">
                         ₹{researchReport.current_market_price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </div>
                     </div>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-2">
+                  <div className="text-[11px] text-slate-500 mt-2 font-mono">
                     Methodology: {researchReport.methodology_version} | Published: {researchReport.generated_at}
                   </div>
                 </div>
@@ -848,7 +885,7 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                   <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
                     1. Executive Summary & Investment Thesis
                   </h4>
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed">
+                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 text-sm text-slate-200 leading-relaxed shadow-inner">
                     {researchReport.executive_summary}
                   </div>
                 </div>
@@ -865,9 +902,9 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
 
                 {/* 3 & 4. Valuation & Profitability Summary Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2">
-                    <h5 className="text-xs font-semibold text-slate-400 uppercase">Valuation Synthesis</h5>
-                    <div className="text-xl font-bold text-emerald-400 font-mono">
+                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2 shadow-sm">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase">Valuation Synthesis</h5>
+                    <div className="text-xl font-black text-emerald-400 font-mono">
                       Intrinsic Fair Value: ₹{researchReport.valuation_synthesis?.composite_central_fair_value?.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || 'N/A'}
                     </div>
                     <div className="text-xs text-slate-300">
@@ -875,11 +912,11 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2">
-                    <h5 className="text-xs font-semibold text-slate-400 uppercase">Key Margins</h5>
+                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-2 shadow-sm">
+                    <h5 className="text-xs font-bold text-slate-400 uppercase">Key Operating Margins</h5>
                     <div className="text-sm text-slate-200 space-y-1">
-                      <div>EBITDA Margin: <strong>{researchReport.profitability_analysis?.ebitda_margin_pct || '0.0'}%</strong></div>
-                      <div>ROCE: <strong>{researchReport.profitability_analysis?.roce_pct || '0.0'}%</strong></div>
+                      <div>EBITDA Margin: <strong className="font-mono text-white">{researchReport.profitability_analysis?.ebitda_margin_pct || '0.0'}%</strong></div>
+                      <div>ROCE: <strong className="font-mono text-emerald-400">{researchReport.profitability_analysis?.roce_pct || '0.0'}%</strong></div>
                     </div>
                   </div>
                 </div>
@@ -907,15 +944,15 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
       {/* --------------------------------------------------------------------- */}
       {activeTab === 'watchlist' && (
         <div className="space-y-6">
-          {/* Add Ticker Bar */}
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
+          {/* Add Ticker Bar & Search */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-md space-y-4">
             <form onSubmit={handleAddToWatchlist} className="flex flex-col md:flex-row items-center gap-4">
               <input
                 type="text"
                 value={newTicker}
                 onChange={(e) => setNewTicker(e.target.value)}
                 placeholder="Ticker (e.g. INFY, TCS, RELIANCE)"
-                className="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-48 uppercase"
+                className="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-48 uppercase font-bold"
               />
               <input
                 type="text"
@@ -927,46 +964,57 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
               <button
                 type="submit"
                 disabled={!newTicker.trim()}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition whitespace-nowrap w-full md:w-auto justify-center"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition whitespace-nowrap w-full md:w-auto justify-center shadow"
               >
                 <Plus className="w-4 h-4" />
                 Add to Watchlist
               </button>
             </form>
+
+            <div className="relative pt-2">
+              <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-5 pointer-events-none" />
+              <input
+                type="text"
+                value={watchlistFilter}
+                onChange={(e) => setWatchlistFilter(e.target.value)}
+                placeholder="Filter watchlist by symbol, company name, or sector..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
           </div>
 
           {/* Watchlist Grid */}
-          <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-md">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Bookmark className="w-4 h-4 text-indigo-400" />
-                Tracked Equities & Active Anomaly Triggers ({watchlist.length})
+                Tracked Equities & Active Anomaly Triggers ({filteredWatchlist.length})
               </h3>
             </div>
 
             {loadingWatchlist ? (
-              <div className="py-12 text-center text-slate-400 text-sm">
+              <div className="py-16 text-center text-slate-400 text-sm">
                 Scanning financial metrics for material anomalies...
               </div>
-            ) : watchlist.length === 0 ? (
-              <div className="py-8 text-center text-slate-500 text-sm">
-                No active companies on your watchlist. Add a ticker above.
+            ) : filteredWatchlist.length === 0 ? (
+              <div className="py-12 text-center text-slate-500 text-sm">
+                No active companies match your filter.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {watchlist.map((item: WatchlistItemDTO) => (
+                {filteredWatchlist.map((item: WatchlistItemDTO) => (
                   <div
                     key={item.id}
-                    className="p-5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-4 hover:border-slate-700 transition relative"
+                    className="p-5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-4 hover:border-slate-700 transition shadow-sm relative"
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <h4 className="text-base font-bold text-white">{item.ticker}</h4>
-                        <p className="text-xs text-slate-400">{item.company_name}</p>
+                        <h4 className="text-base font-black text-white">{item.ticker}</h4>
+                        <p className="text-xs text-slate-400 font-medium">{item.company_name}</p>
                       </div>
                       <button
                         onClick={() => handleRemoveFromWatchlist(item.ticker)}
-                        className="text-slate-500 hover:text-red-400 p-1 transition"
+                        className="text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-900 transition"
                         title="Remove from watchlist"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -974,38 +1022,38 @@ export const AIAnalystWorkspaceView: React.FC<AIAnalystWorkspaceViewProps> = ({
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2 bg-slate-900 rounded border border-slate-800">
-                        <span className="text-slate-400">P/E Ratio</span>
-                        <div className="font-bold text-white mt-0.5">{item.latest_pe.toFixed(1)}x</div>
+                      <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 font-semibold">P/E Ratio</span>
+                        <div className="font-bold text-white mt-0.5 font-mono">{item.latest_pe.toFixed(1)}x</div>
                       </div>
-                      <div className="p-2 bg-slate-900 rounded border border-slate-800">
-                        <span className="text-slate-400">ROCE</span>
-                        <div className="font-bold text-emerald-400 mt-0.5">{item.latest_roce_pct.toFixed(1)}%</div>
+                      <div className="p-2.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 font-semibold">ROCE</span>
+                        <div className="font-bold text-emerald-400 mt-0.5 font-mono">{item.latest_roce_pct.toFixed(1)}%</div>
                       </div>
                     </div>
 
                     {item.notes && (
-                      <p className="text-xs text-slate-300 italic bg-slate-900/50 p-2 rounded border border-slate-850">
+                      <p className="text-xs text-slate-300 italic bg-slate-900/50 p-2.5 rounded-lg border border-slate-850">
                         "{item.notes}"
                       </p>
                     )}
 
                     {/* Active Alerts */}
                     <div className="space-y-1.5 pt-2 border-t border-slate-850">
-                      <div className="text-[11px] font-semibold text-slate-400 flex items-center justify-between">
+                      <div className="text-[11px] font-bold text-slate-400 flex items-center justify-between">
                         <span>Anomaly Triggers</span>
-                        <span className="text-indigo-400 font-bold">{item.active_alerts.length}</span>
+                        <span className="text-indigo-400 font-mono font-bold">{item.active_alerts.length}</span>
                       </div>
                       {item.active_alerts.map((al: WatchlistAlert, idx: number) => (
                         <div
                           key={idx}
-                          className="p-2 bg-indigo-950/30 border border-indigo-900/40 rounded text-[11px] text-slate-300 space-y-0.5"
+                          className="p-2.5 bg-indigo-950/30 border border-indigo-900/40 rounded-lg text-[11px] text-slate-300 space-y-0.5"
                         >
-                          <div className="font-semibold text-indigo-300 flex items-center justify-between">
+                          <div className="font-bold text-indigo-300 flex items-center justify-between">
                             <span>{al.metric_name}</span>
                             <span className="font-mono">{al.current_value}</span>
                           </div>
-                          <p className="text-slate-400">{al.message}</p>
+                          <p className="text-slate-400 leading-snug">{al.message}</p>
                         </div>
                       ))}
                     </div>

@@ -22,7 +22,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     <div className="app-container">
       <Sidebar currentTab={currentTab} onSelectTab={onSelectTab} />
       <div className="main-content">
-        <Header systemStatus={systemStatus} version={version} />
+        <Header currentTab={currentTab} systemStatus={systemStatus} version={version} />
         <main className="page-body">{children}</main>
         <Footer />
       </div>
