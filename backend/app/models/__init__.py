@@ -51,6 +51,22 @@ from app.models.valuation import (
     ValuationSummaryResponse,
 )
 
+from app.models.document_intelligence import (
+    DocumentType,
+    DocumentProcessingStatus,
+    DocumentRecord,
+    DocumentPageRecord,
+    DocumentChunkRecord,
+    DocumentPageDTO,
+    DocumentMetadataDTO,
+    DocumentDetailDTO,
+    EvidenceCitation,
+    DocumentRetrievalQuery,
+    DocumentRetrievalResult,
+    DocumentRetrievalResponse,
+    IngestionUploadResponse,
+)
+
 __all__ = [
     "Base",
     "TimestampMixin",
@@ -106,5 +122,18 @@ __all__ = [
     "SOTPSegment",
     "SOTPValuationResult",
     "ValuationSummaryResponse",
+    "DocumentType",
+    "DocumentProcessingStatus",
+    "DocumentRecord",
+    "DocumentPageRecord",
+    "DocumentChunkRecord",
+    "DocumentPageDTO",
+    "DocumentMetadataDTO",
+    "DocumentDetailDTO",
+    "EvidenceCitation",
+    "DocumentRetrievalQuery",
+    "DocumentRetrievalResult",
+    "DocumentRetrievalResponse",
+    "IngestionUploadResponse",
 ]
 
