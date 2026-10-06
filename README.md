@@ -9,21 +9,20 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_Async-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Phase 4 Checkpoint](https://img.shields.io/badge/Phase_4-Valuation_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_4_checkpoint.md)
-[![Test Coverage](https://img.shields.io/badge/Test_Suite-66_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Phase 7 Checkpoint](https://img.shields.io/badge/Phase_7-AI_Analyst_%26_Research_Product_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_7_checkpoint.md)
+[![Test Coverage](https://img.shields.io/badge/Test_Suite-92_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
 <p align="center">
   <a href="#-executive-summary">Executive Summary</a> •
-  <a href="#-the-cardinal-law-of-financial-computing">Core Law</a> •
+  <a href="#-phase-7-ai-analyst--research-product">Phase 7 AI Analyst</a> •
+  <a href="#-phase-6-document-intelligence--rag">Phase 6 Document RAG</a> •
   <a href="#-phase-4-valuation-engine--scenario-modeling">Phase 4 Valuation</a> •
   <a href="#-phase-3-forensic-intelligence-engine">Phase 3 Forensics</a> •
   <a href="#-phase-2-fundamental-analysis-engine">Phase 2 Fundamentals</a> •
   <a href="#-phase-1-financial-data-engine">Phase 1 Data Engine</a> •
   <a href="#-system-architecture">Architecture</a> •
-  <a href="#-data-provenance--audit-trail">Provenance</a> •
   <a href="#-deterministic-validation">Validation</a> •
   <a href="#-api-endpoints">API Spec</a> •
-  <a href="#-quickstart--installation">Quickstart</a> •
   <a href="#-testing--verification">Testing</a> •
   <a href="#-documentation-index">Docs</a>
 </p>
@@ -54,6 +53,39 @@ This platform solves this fundamental problem through a **hard computational bou
 ```
 
 > **Cardinal Rule:** The LLM is **NOT** a source of truth or a calculator. Mathematical correctness is guaranteed by code, verified by deterministic tests, and backed by immutable audit lineage.
+
+---
+
+## 🤖 Phase 7: AI Analyst, Historical Validation & Research Product
+
+Phase 7 delivers a production-grade, zero-hallucination institutional research experience:
+
+1. **Deterministic & Pluggable AI Architecture**:
+   - Zero-hallucination offline financial reasoner producing structured, verifiable analytical claims.
+   - Configurable for Google Gemini and OpenAI external LLM backends with strict JSON schema adherence.
+2. **Financial Question Router**:
+   - Classifies user intent across 11 financial dimensions (ROCE, margins, cash quality, forensics, DCF assumptions, management guidance).
+3. **Point-in-Time (PIT) Temporal Guardrails**:
+   - Reconstructs historical financial analysis strictly bounded by chosen cut-off periods, completely eliminating lookahead bias.
+4. **Mandatory Citation Verification & Accusation Interception**:
+   - Cross-references every analytical claim against underlying numbers or exact Annual Report PDF quotations.
+   - Intercepts inflammatory accusations and sanitizes statistical anomalies into compliant screening findings.
+5. **Management "Said vs Did" Credibility Tracker**:
+   - Evaluates forward-looking management guidance against multi-year audited outcomes with an objective credibility percentage.
+6. **14-Section Institutional Equity Research Report Generator**:
+   - Synthesizes business overview, 5-step DuPont decomposition, forensic scoreboard, DCF valuation, and statutory caveats into a publication-grade report.
+7. **Watchlist & Metric Anomaly Alert Engine**:
+   - Screens monitored equities for margin shifts (>200 bps), working capital stress, and credit health transitions.
+
+---
+
+## 📑 Phase 6: Document Intelligence & Annual Report RAG
+
+Phase 6 implements a statutory document processing and retrieval-augmented generation (RAG) pipeline:
+
+1. **Multi-Stage Document Ingestion**: PDF parsing, SHA-256 fingerprinting, page preservation, and table boundary detection.
+2. **Deterministic Financial Vector Embeddings**: 64-dimensional semantic projection with cosine similarity retrieval.
+3. **Structured Citation Provenance**: Every retrieved passage retains document ID, ticker, fiscal year, page number, section title, and exact quote.
 
 ---
 
