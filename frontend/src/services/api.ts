@@ -23,6 +23,12 @@ import {
   BankValuationResult,
   SOTPSegment,
   SOTPValuationResult,
+  DocumentMetadataDTO,
+  DocumentDetailDTO,
+  DocumentPageDTO,
+  DocumentRetrievalQuery,
+  DocumentRetrievalResponse,
+  IngestionUploadResponse,
 } from '../types/api';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -371,6 +377,66 @@ export const ApiService = {
       }
     );
   },
+
+  // ---------------------------------------------------------------------------
+  // Phase 6: Document Intelligence & Annual Report RAG
+  // ---------------------------------------------------------------------------
+
+  async getDocuments(ticker?: string): Promise<DocumentMetadataDTO[]> {
+    const params = new URLSearchParams();
+    if (ticker) params.append('ticker', ticker);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return fetchJson<DocumentMetadataDTO[]>(`/documents${qs}`);
+  },
+
+  async getCanonicalSections(): Promise<string[]> {
+    return fetchJson<string[]>('/documents/sections/canonical');
+  },
+
+  async getDocumentDetail(documentId: number): Promise<DocumentDetailDTO> {
+    return fetchJson<DocumentDetailDTO>(`/documents/${documentId}`);
+  },
+
+  async getDocumentPage(documentId: number, pageNumber: number): Promise<DocumentPageDTO> {
+    return fetchJson<DocumentPageDTO>(`/documents/${documentId}/pages/${pageNumber}`);
+  },
+
+  async searchDocuments(query: DocumentRetrievalQuery): Promise<DocumentRetrievalResponse> {
+    return fetchJson<DocumentRetrievalResponse>('/documents/search', {
+      method: 'POST',
+      body: JSON.stringify(query),
+    });
+  },
+
+  async uploadDocument(
+    file: File,
+    ticker: string,
+    fiscalYear: number,
+    title?: string,
+    sourceUrl?: string
+  ): Promise<IngestionUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('ticker', ticker);
+    formData.append('fiscal_year', fiscalYear.toString());
+    if (title) formData.append('title', title);
+    if (sourceUrl) formData.append('source_url', sourceUrl);
+
+    const url = `${API_BASE_URL}/documents/upload`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      const message = errorBody?.error?.message || errorBody?.detail || `HTTP Error ${response.status}: ${response.statusText}`;
+      throw new Error(message);
+    }
+
+    return response.json();
+  },
 };
+
 
 

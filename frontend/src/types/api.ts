@@ -826,6 +826,118 @@ export interface ValuationSummaryResponse {
   methodology_version: string;
 }
 
+// ---------------------------------------------------------------------------
+// Phase 6: Document Intelligence & Annual Report RAG Types
+// ---------------------------------------------------------------------------
+
+export type DocumentType = 
+  | 'ANNUAL_REPORT'
+  | 'EARNINGS_CALL_TRANSCRIPT'
+  | 'INVESTOR_PRESENTATION'
+  | 'AUDITOR_REPORT'
+  | 'REGULATORY_FILING';
+
+export type DocumentProcessingStatus = 
+  | 'PENDING'
+  | 'PARSING'
+  | 'CHUNKING'
+  | 'INDEXING'
+  | 'COMPLETED'
+  | 'FAILED';
+
+export interface DocumentPageDTO {
+  page_number: number;
+  detected_section?: string | null;
+  char_count: number;
+  has_tables: boolean;
+  text: string;
+}
+
+export interface DocumentMetadataDTO {
+  id: number;
+  ticker: string;
+  fiscal_year: number;
+  document_type: DocumentType;
+  title: string;
+  file_name: string;
+  source_url?: string | null;
+  file_hash_sha256: string;
+  page_count: number;
+  file_size_bytes: number;
+  extraction_method: string;
+  processing_status: DocumentProcessingStatus;
+  error_message?: string | null;
+  retrieval_date: string;
+  total_chunks: number;
+}
+
+export interface DocumentDetailDTO extends DocumentMetadataDTO {
+  sections_detected: string[];
+  pages: DocumentPageDTO[];
+}
+
+export interface EvidenceCitation {
+  document_id: number;
+  document_title: string;
+  ticker: string;
+  fiscal_year: number;
+  page_number: number;
+  section_title: string;
+  exact_quote: string;
+  char_start?: number | null;
+  char_end?: number | null;
+  relevance_score: number;
+  source_url?: string | null;
+  provenance_hash: string;
+}
+
+export interface DocumentRetrievalQuery {
+  query_text: string;
+  ticker?: string;
+  fiscal_year?: number;
+  section?: string;
+  document_type?: DocumentType;
+  top_k?: number;
+  min_relevance_score?: number;
+}
+
+export interface DocumentRetrievalResult {
+  chunk_id: number;
+  document_id: number;
+  document_title: string;
+  ticker: string;
+  fiscal_year: number;
+  page_number: number;
+  section_title: string;
+  chunk_text: string;
+  relevance_score: number;
+  citation: EvidenceCitation;
+}
+
+export interface DocumentRetrievalResponse {
+  query_text: string;
+  filters_applied: Record<string, any>;
+  total_matches: number;
+  results: DocumentRetrievalResult[];
+  retrieval_latency_ms: number;
+  embedding_model: string;
+  methodology_version: string;
+}
+
+export interface IngestionUploadResponse {
+  document_id: number;
+  ticker: string;
+  fiscal_year: number;
+  file_name: string;
+  file_hash_sha256: string;
+  page_count: number;
+  total_chunks_indexed: number;
+  sections_detected: string[];
+  processing_status: DocumentProcessingStatus;
+  message: string;
+}
+
+
 
 
 

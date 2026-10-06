@@ -1,4 +1,4 @@
-import { Activity, Layers, Database, Lock, Terminal, Building2, TrendingUp, ShieldAlert, DollarSign } from 'lucide-react';
+import { Activity, Layers, Database, Lock, Terminal, Building2, TrendingUp, ShieldAlert, DollarSign, BookOpen } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
@@ -98,12 +98,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
           <span>Valuation & DCF Engine</span>
         </div>
 
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
+          Phase 6 Annual Reports (RAG)
+        </div>
+        <div
+          className={`nav-item ${currentTab === 'annual_reports' ? 'active' : ''}`}
+          onClick={() => onSelectTab('annual_reports')}
+        >
+          <BookOpen size={18} />
+          <span>Annual Report Intelligence</span>
+        </div>
+
         <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
           Future Phases (Locked)
         </div>
         <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
           <Lock size={16} />
-          <span>AI Decision Engine (P5)</span>
+          <span>AI Multi-Agent Analyst (P7)</span>
         </div>
       </nav>
 
