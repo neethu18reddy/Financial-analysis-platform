@@ -1,4 +1,4 @@
-import { Activity, Layers, Database, Lock, Terminal, Building2, TrendingUp, ShieldAlert } from 'lucide-react';
+import { Activity, Layers, Database, Lock, Terminal, Building2, TrendingUp, ShieldAlert, DollarSign } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
@@ -87,12 +87,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
           <span>Forensic Intelligence</span>
         </div>
 
+        <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 700, textTransform: 'uppercase' }}>
+          Phase 4 Valuation Engine
+        </div>
+        <div
+          className={`nav-item ${currentTab === 'valuation' ? 'active' : ''}`}
+          onClick={() => onSelectTab('valuation')}
+        >
+          <DollarSign size={18} />
+          <span>Valuation & DCF Engine</span>
+        </div>
+
         <div style={{ marginTop: '1.25rem', padding: '0.5rem 0.75rem', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
           Future Phases (Locked)
-        </div>
-        <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
-          <Lock size={16} />
-          <span>Valuation & DCF (P4)</span>
         </div>
         <div className="nav-item" style={{ opacity: 0.45, cursor: 'not-allowed' }}>
           <Lock size={16} />

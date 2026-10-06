@@ -517,5 +517,315 @@ export interface CompanyForensicResponse {
   methodology_version: string;
 }
 
+// ============================================================================
+// PHASE 4: VALUATION ENGINE TYPES
+// ============================================================================
+
+export type ValuationMethodType =
+  | 'DCF_FCFF'
+  | 'DCF_FCFE'
+  | 'REVERSE_DCF'
+  | 'MULTIPLES_RELATIVE'
+  | 'DDM_BANKS'
+  | 'RESIDUAL_INCOME'
+  | 'SOTP';
+
+export type TerminalValueMethodType = 'GORDON_GROWTH' | 'EXIT_MULTIPLE';
+
+export type ScenarioType = 'BEAR' | 'BASE' | 'BULL' | 'CUSTOM';
+
+export interface CashFlowProjectionYear {
+  year_index: number;
+  fiscal_year: number;
+  revenue: number;
+  revenue_growth_pct: number;
+  operating_profit_ebit: number;
+  ebit_margin_pct: number;
+  effective_tax_rate_pct: number;
+  nopat: number;
+  depreciation_amortization: number;
+  capital_expenditure: number;
+  change_in_nwc: number;
+  free_cash_flow: number;
+  discount_factor: number;
+  discounted_fcf: number;
+}
+
+export interface WACCBreakdown {
+  risk_free_rate: number;
+  equity_risk_premium: number;
+  beta: number;
+  cost_of_equity: number;
+  pre_tax_cost_of_debt: number;
+  effective_tax_rate: number;
+  after_tax_cost_of_debt: number;
+  equity_weight_pct: number;
+  debt_weight_pct: number;
+  wacc_pct: number;
+  formula_expression: string;
+}
+
+export interface TerminalValueDiagnostics {
+  terminal_value_raw: number;
+  pv_terminal_value: number;
+  pv_explicit_cash_flows: number;
+  enterprise_value: number;
+  terminal_value_pct_of_ev: number;
+  implied_exit_ev_ebitda_multiple?: number | null;
+  implied_perpetual_growth_rate?: number | null;
+  is_terminal_value_dominant: boolean;
+  growth_vs_gdp_warning: boolean;
+  warning_notes: string[];
+}
+
+export interface DCFValuationInputs {
+  forecast_years: number;
+  base_revenue?: number | null;
+  revenue_growth_rates?: number[] | null;
+  constant_revenue_growth_pct: number;
+  target_ebit_margin_pct: number;
+  effective_tax_rate_pct: number;
+  reinvestment_rate_pct: number;
+  wacc_pct?: number | null;
+  cost_of_equity_pct?: number | null;
+  risk_free_rate_pct: number;
+  equity_risk_premium_pct: number;
+  beta: number;
+  pre_tax_cost_of_debt_pct: number;
+  debt_to_capital_pct: number;
+  terminal_value_method: TerminalValueMethodType;
+  terminal_growth_rate_pct: number;
+  exit_ev_ebitda_multiple: number;
+  shares_outstanding_crores?: number | null;
+  total_debt_crores?: number | null;
+  cash_and_investments_crores?: number | null;
+  minority_interest_crores?: number | null;
+}
+
+export interface DCFValuationResult {
+  company_id: number;
+  ticker: string;
+  valuation_method: ValuationMethodType;
+  valuation_date: string;
+  currency: string;
+  unit: string;
+  inputs_applied: DCFValuationInputs;
+  wacc_breakdown: WACCBreakdown;
+  projections: CashFlowProjectionYear[];
+  pv_explicit_forecast: number;
+  terminal_value_raw: number;
+  pv_terminal_value: number;
+  enterprise_value: number;
+  total_debt: number;
+  cash_and_investments: number;
+  net_debt: number;
+  minority_interest: number;
+  equity_value: number;
+  shares_outstanding_crores: number;
+  estimated_fair_value_per_share: number;
+  current_market_price?: number | null;
+  upside_downside_pct?: number | null;
+  terminal_diagnostics: TerminalValueDiagnostics;
+  formula_lineage: Record<string, string>;
+  methodology_version: string;
+}
+
+export interface ReverseDCFInputs {
+  current_market_price: number;
+  shares_outstanding_crores?: number | null;
+  forecast_years?: number;
+  target_ebit_margin_pct?: number | null;
+  wacc_pct?: number;
+  terminal_growth_rate_pct?: number;
+  effective_tax_rate_pct?: number;
+  reinvestment_rate_pct?: number;
+  net_debt_crores?: number | null;
+}
+
+export interface ReverseDCFResult {
+  company_id: number;
+  ticker: string;
+  current_market_price: number;
+  current_market_cap_crores: number;
+  implied_enterprise_value: number;
+  wacc_pct: number;
+  terminal_growth_rate_pct: number;
+  assumed_ebit_margin_pct: number;
+  implied_revenue_cagr_pct: number;
+  implied_fcf_cagr_pct: number;
+  historical_revenue_cagr_3yr?: number | null;
+  growth_premium_vs_historical_pct?: number | null;
+  implied_5yr_revenue_target: number;
+  implied_5yr_fcf_target: number;
+  plausibility_assessment: 'CONSERVATIVE' | 'REALISTIC' | 'AGGRESSIVE' | 'EXTREME';
+  plausibility_reasoning: string;
+  sensitivities: Array<{
+    wacc_pct: number;
+    ebit_margin_pct: number;
+    implied_growth_needed_pct: number;
+  }>;
+  methodology_version: string;
+}
+
+export interface MultipleMetricComparison {
+  multiple_name: string;
+  current_multiple?: number | null;
+  historical_1yr_median?: number | null;
+  historical_3yr_median?: number | null;
+  historical_5yr_median?: number | null;
+  historical_min?: number | null;
+  historical_max?: number | null;
+  peer_benchmark_median?: number | null;
+  underlying_financial_metric: number;
+  target_multiple_applied: number;
+  implied_fair_value_per_share: number;
+  upside_downside_pct?: number | null;
+  limitations: string;
+}
+
+export interface MultiplesValuationResult {
+  company_id: number;
+  ticker: string;
+  current_market_price: number;
+  multiples: MultipleMetricComparison[];
+  composite_median_fair_value: number;
+  composite_upside_downside_pct?: number | null;
+  methodology_notes: string[];
+  methodology_version: string;
+}
+
+export interface ScenarioCase {
+  scenario_type: ScenarioType;
+  probability_weight_pct: number;
+  revenue_growth_pct: number;
+  ebit_margin_pct: number;
+  wacc_pct: number;
+  terminal_growth_pct: number;
+  estimated_fair_value_per_share: number;
+  upside_downside_pct?: number | null;
+  key_assumptions: string[];
+}
+
+export interface ScenarioAnalysisResult {
+  company_id: number;
+  ticker: string;
+  current_market_price: number;
+  scenarios: ScenarioCase[];
+  probability_weighted_fair_value: number;
+  expected_upside_downside_pct: number;
+  risk_reward_skew: 'FAVORABLE' | 'SYMMETRIC' | 'UNFAVORABLE';
+  methodology_version: string;
+}
+
+export interface SensitivityCell {
+  row_value: number;
+  col_value: number;
+  fair_value_per_share: number;
+  upside_downside_pct?: number | null;
+}
+
+export interface SensitivityMatrixResult {
+  matrix_name: string;
+  row_parameter_name: string;
+  row_parameter_unit: string;
+  col_parameter_name: string;
+  col_parameter_unit: string;
+  row_values: number[];
+  col_values: number[];
+  grid: SensitivityCell[][];
+  base_row_value: number;
+  base_col_value: number;
+  base_fair_value: number;
+}
+
+export interface BankDDMYear {
+  year_index: number;
+  fiscal_year: number;
+  total_assets: number;
+  loan_growth_pct: number;
+  net_worth: number;
+  return_on_equity_pct: number;
+  net_profit_pat: number;
+  tier1_capital_retention_pct: number;
+  dividend_payout_pct: number;
+  dividends_paid: number;
+  discount_factor: number;
+  discounted_dividend: number;
+}
+
+export interface BankValuationResult {
+  company_id: number;
+  ticker: string;
+  sector: string;
+  valuation_method: ValuationMethodType;
+  is_financial_institution: boolean;
+  current_book_value_per_share: number;
+  current_roe_pct: number;
+  cost_of_equity_pct: number;
+  sustainable_growth_rate_pct: number;
+  projections: BankDDMYear[];
+  pv_explicit_dividends: number;
+  terminal_value_dividends: number;
+  pv_terminal_value: number;
+  ddm_fair_value_per_share: number;
+  justified_pb_multiple: number;
+  justified_pb_fair_value_per_share: number;
+  current_market_price?: number | null;
+  upside_downside_pct?: number | null;
+  methodology_notes: string[];
+  limitations: string;
+  methodology_version: string;
+}
+
+export interface SOTPSegment {
+  segment_name: string;
+  segment_description: string;
+  revenue: number;
+  ebitda: number;
+  benchmark_ev_ebitda_multiple: number;
+  implied_enterprise_value: number;
+  ownership_stake_pct: number;
+  effective_enterprise_value: number;
+}
+
+export interface SOTPValuationResult {
+  company_id: number;
+  ticker: string;
+  segments: SOTPSegment[];
+  gross_enterprise_value: number;
+  holding_company_discount_pct: number;
+  net_enterprise_value: number;
+  net_debt: number;
+  equity_value: number;
+  shares_outstanding_crores: number;
+  fair_value_per_share: number;
+  current_market_price?: number | null;
+  upside_downside_pct?: number | null;
+  methodology_version: string;
+}
+
+export interface ValuationSummaryResponse {
+  company_id: number;
+  ticker: string;
+  legal_name: string;
+  sector: string;
+  is_financial_institution: boolean;
+  current_market_price: number;
+  shares_outstanding_crores: number;
+  market_cap_crores: number;
+  dcf_result?: DCFValuationResult | null;
+  reverse_dcf_result?: ReverseDCFResult | null;
+  multiples_result?: MultiplesValuationResult | null;
+  scenario_result?: ScenarioAnalysisResult | null;
+  bank_valuation_result?: BankValuationResult | null;
+  composite_fair_value_range_low: number;
+  composite_fair_value_range_high: number;
+  composite_central_fair_value: number;
+  composite_upside_downside_pct: number;
+  valuation_summary_text: string;
+  methodology_version: string;
+}
+
+
 
 
