@@ -937,6 +937,176 @@ export interface IngestionUploadResponse {
   message: string;
 }
 
+// ---------------------------------------------------------------------------
+// Phase 7: AI Analyst, Grounding, PIT, Research Report, & Watchlist
+// ---------------------------------------------------------------------------
+
+export type QuestionIntent =
+  | 'PERFORMANCE_TREND'
+  | 'ROCE_MARGINS'
+  | 'CASH_FLOW_QUALITY'
+  | 'WORKING_CAPITAL_DYNAMICS'
+  | 'FORENSIC_INTELLIGENCE'
+  | 'VALUATION_DRIVERS'
+  | 'BUSINESS_RISKS'
+  | 'MANAGEMENT_GUIDANCE'
+  | 'MANAGEMENT_TRACK_RECORD'
+  | 'EVIDENCE_RETRIEVAL'
+  | 'GENERAL_RESEARCH';
+
+export type ClaimGroundingStatus =
+  | 'VERIFIED_CITATION'
+  | 'DERIVED_METRIC'
+  | 'UNSUPPORTED_REJECTED'
+  | 'QUALITATIVE_SYNTHESIS';
+
+export interface AnalyticalClaim {
+  claim_id: string;
+  statement: string;
+  grounding_status: ClaimGroundingStatus;
+  confidence_score: number;
+  citation_ids: string[];
+  verifiable_source?: string | null;
+  underlying_metric_key?: string | null;
+  metric_value?: number | null;
+  rejection_reason?: string | null;
+}
+
+export interface AIAnalystQuery {
+  ticker: string;
+  question: string;
+  as_of_fiscal_year?: number | null;
+  focus_category?: string | null;
+  include_annual_report_rag?: boolean;
+  temperature?: number;
+}
+
+export interface AIAnalystResponse {
+  query_id: string;
+  ticker: string;
+  company_name: string;
+  detected_intent: QuestionIntent;
+  executive_summary: string;
+  key_claims: AnalyticalClaim[];
+  grounded_reasoning: string;
+  supporting_citations: EvidenceCitation[];
+  data_confidence_score: number;
+  methodology_version: string;
+  generated_at: string;
+  caveats_and_limitations: string[];
+}
+
+export type GuidanceCategory =
+  | 'CAPEX_EXPANSION'
+  | 'REVENUE_GROWTH'
+  | 'MARGIN_TARGET'
+  | 'DEBT_REDUCTION'
+  | 'DIVIDEND_PAYOUT'
+  | 'STRATEGIC_MNA'
+  | 'PRODUCT_LAUNCH';
+
+export type DeliveryStatus =
+  | 'MET'
+  | 'PARTIALLY_MET'
+  | 'MISSED'
+  | 'IN_PROGRESS'
+  | 'INCONCLUSIVE';
+
+export interface ManagementGuidanceItem {
+  guidance_id: number;
+  fiscal_year_stated: number;
+  stated_period_label: string;
+  category: GuidanceCategory;
+  stated_guidance_text: string;
+  target_metric?: string | null;
+  target_value?: string | null;
+  evaluation_year: number;
+  actual_outcome_text: string;
+  delivery_status: DeliveryStatus;
+  credibility_score: number;
+  source_citation: string;
+}
+
+export interface ManagementSaidVsDidResponse {
+  ticker: string;
+  company_name: string;
+  total_commitments: number;
+  commitments_met: number;
+  commitments_partially_met: number;
+  commitments_missed: number;
+  credibility_score_pct: number;
+  items: ManagementGuidanceItem[];
+  methodology_version: string;
+}
+
+export interface PointInTimeAnalysisRequest {
+  ticker: string;
+  as_of_year: number;
+  as_of_quarter?: number | null;
+  custom_question?: string | null;
+}
+
+export interface PointInTimeAnalysisResponse {
+  ticker: string;
+  company_name: string;
+  as_of_year: number;
+  available_fiscal_years: number[];
+  future_data_excluded: number[];
+  leakage_guard_passed: boolean;
+  historical_analyst_verdict: AIAnalystResponse;
+}
+
+export interface CompanyResearchReport {
+  ticker: string;
+  legal_name: string;
+  sector: string;
+  industry: string;
+  current_market_price: number;
+  generated_at: string;
+  methodology_version: string;
+  executive_summary: string;
+  business_overview: string;
+  financial_performance: Record<string, any>;
+  profitability_analysis: Record<string, any>;
+  growth_analysis: Record<string, any>;
+  cash_flow_quality: Record<string, any>;
+  working_capital_dynamics: Record<string, any>;
+  dupont_decomposition: Record<string, any>;
+  forensic_scoreboard: Record<string, any>;
+  valuation_synthesis: Record<string, any>;
+  business_quality_and_risks: Record<string, any>;
+  management_said_vs_did: Record<string, any>;
+  annual_report_evidence: EvidenceCitation[];
+  research_caveats_and_uncertainty: string[];
+}
+
+export type WatchlistAlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
+
+export interface WatchlistAlert {
+  ticker: string;
+  metric_name: string;
+  current_value: string;
+  previous_value: string;
+  variance_pct: number;
+  severity: WatchlistAlertSeverity;
+  message: string;
+  triggered_at: string;
+}
+
+export interface WatchlistItemDTO {
+  id: number;
+  ticker: string;
+  company_name: string;
+  sector: string;
+  notes?: string | null;
+  is_active: boolean;
+  latest_pe: number;
+  latest_roce_pct: number;
+  forensic_status: string;
+  active_alerts: WatchlistAlert[];
+}
+
+
 
 
 

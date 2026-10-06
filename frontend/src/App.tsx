@@ -8,14 +8,17 @@ import { FundamentalAnalysisView } from './views/FundamentalAnalysisView';
 import { ForensicIntelligenceView } from './views/ForensicIntelligenceView';
 import { ValuationWorkspaceView } from './views/ValuationWorkspaceView';
 import { AnnualReportIntelligenceView } from './views/AnnualReportIntelligenceView';
-import { ApiService } from './services/api';
-import { HealthResponse } from './types/api';
+import { AIAnalystWorkspaceView } from './views/AIAnalystWorkspaceView';
+import { ApiService, api } from './services/api';
+import { Company, HealthResponse } from './types/api';
 
 export function App() {
-  const [currentTab, setCurrentTab] = useState<string>('annual_reports');
+  const [currentTab, setCurrentTab] = useState<string>('ai_analyst');
   const [healthData, setHealthData] = useState<HealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const fetchHealth = useCallback(async () => {
     setLoading(true);
@@ -30,9 +33,22 @@ export function App() {
     }
   }, []);
 
+  const loadCompanies = useCallback(async () => {
+    try {
+      const comps = await api.getCompanies();
+      setCompanies(comps);
+      if (comps.length > 0 && !selectedCompany) {
+        setSelectedCompany(comps[0]);
+      }
+    } catch (err) {
+      console.error('Failed to load companies:', err);
+    }
+  }, [selectedCompany]);
+
   useEffect(() => {
     fetchHealth();
-  }, [fetchHealth]);
+    loadCompanies();
+  }, [fetchHealth, loadCompanies]);
 
   const systemStatus = healthData?.status || (error ? 'unhealthy' : 'checking');
   const version = healthData?.version || '0.1.0';
@@ -44,6 +60,13 @@ export function App() {
       systemStatus={systemStatus}
       version={version}
     >
+      {currentTab === 'ai_analyst' && (
+        <AIAnalystWorkspaceView
+          companies={companies}
+          selectedCompany={selectedCompany}
+          onSelectCompany={setSelectedCompany}
+        />
+      )}
       {currentTab === 'annual_reports' && <AnnualReportIntelligenceView />}
       {currentTab === 'valuation' && <ValuationWorkspaceView />}
       {currentTab === 'forensics' && <ForensicIntelligenceView />}
@@ -63,6 +86,4 @@ export function App() {
   );
 }
 
-
 export default App;
-

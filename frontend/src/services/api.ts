@@ -29,6 +29,13 @@ import {
   DocumentRetrievalQuery,
   DocumentRetrievalResponse,
   IngestionUploadResponse,
+  AIAnalystQuery,
+  AIAnalystResponse,
+  ManagementSaidVsDidResponse,
+  PointInTimeAnalysisRequest,
+  PointInTimeAnalysisResponse,
+  CompanyResearchReport,
+  WatchlistItemDTO,
 } from '../types/api';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
@@ -436,7 +443,55 @@ export const ApiService = {
 
     return response.json();
   },
+
+  // ---------------------------------------------------------------------------
+  // Phase 7: AI Analyst, Grounding, PIT, Research Reports, & Watchlist
+  // ---------------------------------------------------------------------------
+
+  async queryAIAnalyst(query: AIAnalystQuery): Promise<AIAnalystResponse> {
+    return fetchJson<AIAnalystResponse>('/ai/query', {
+      method: 'POST',
+      body: JSON.stringify(query),
+    });
+  },
+
+  async getSaidVsDid(ticker: string): Promise<ManagementSaidVsDidResponse> {
+    return fetchJson<ManagementSaidVsDidResponse>(`/ai/said-vs-did/${encodeURIComponent(ticker)}`);
+  },
+
+  async runPointInTime(request: PointInTimeAnalysisRequest): Promise<PointInTimeAnalysisResponse> {
+    return fetchJson<PointInTimeAnalysisResponse>('/ai/point-in-time', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+
+  async getResearchReport(companyId: number): Promise<CompanyResearchReport> {
+    return fetchJson<CompanyResearchReport>(`/ai/research-report/${companyId}`);
+  },
+
+  async getWatchlist(): Promise<WatchlistItemDTO[]> {
+    return fetchJson<WatchlistItemDTO[]>('/watchlist');
+  },
+
+  async addToWatchlist(ticker: string, notes?: string): Promise<WatchlistItemDTO> {
+    const params = new URLSearchParams({ ticker });
+    if (notes) params.append('notes', notes);
+    return fetchJson<WatchlistItemDTO>(`/watchlist?${params.toString()}`, {
+      method: 'POST',
+    });
+  },
+
+  async removeFromWatchlist(ticker: string): Promise<{ success: boolean; ticker: string; message: string }> {
+    return fetchJson<{ success: boolean; ticker: string; message: string }>(`/watchlist/${encodeURIComponent(ticker)}`, {
+      method: 'DELETE',
+    });
+  },
 };
+
+export const api = ApiService;
+export default ApiService;
+
 
 
 
