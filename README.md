@@ -9,12 +9,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_Async-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
-[![Phase 3 Checkpoint](https://img.shields.io/badge/Phase_3-Forensic_Intelligence_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_3_checkpoint.md)
-[![Test Coverage](https://img.shields.io/badge/Test_Suite-50_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Phase 4 Checkpoint](https://img.shields.io/badge/Phase_4-Valuation_Engine_Complete-success?style=for-the-badge&logo=checkmarx&logoColor=white)](docs/phase-checkpoints/phase_4_checkpoint.md)
+[![Test Coverage](https://img.shields.io/badge/Test_Suite-66_Passed_100%25-10b981?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
 
 <p align="center">
   <a href="#-executive-summary">Executive Summary</a> •
   <a href="#-the-cardinal-law-of-financial-computing">Core Law</a> •
+  <a href="#-phase-4-valuation-engine--scenario-modeling">Phase 4 Valuation</a> •
   <a href="#-phase-3-forensic-intelligence-engine">Phase 3 Forensics</a> •
   <a href="#-phase-2-fundamental-analysis-engine">Phase 2 Fundamentals</a> •
   <a href="#-phase-1-financial-data-engine">Phase 1 Data Engine</a> •
@@ -53,6 +54,28 @@ This platform solves this fundamental problem through a **hard computational bou
 ```
 
 > **Cardinal Rule:** The LLM is **NOT** a source of truth or a calculator. Mathematical correctness is guaranteed by code, verified by deterministic tests, and backed by immutable audit lineage.
+
+---
+
+## 💎 Phase 4: Valuation Engine & Scenario Modeling Capabilities
+
+Phase 4 delivers an institutional valuation suite with pure Python determinism, real-time expectation solving, and multi-scenario risk analysis:
+
+1. **Multi-Stage Free Cash Flow to Firm (FCFF) DCF:**
+   - Pro-forma forecasting (3 to 10 years) covering Revenue, EBIT, NOPAT, Capex, and Working Capital.
+   - WACC derivation incorporating Indian G-Sec risk-free rate ($\sim 7.10\%$), Equity Risk Premium ($6.00\%$), and after-tax cost of debt.
+   - Dual terminal value approaches: Gordon Growth Model and Exit Multiple with balance sheet bridge to Equity Value.
+2. **Reverse DCF Market Expectation Solver:**
+   - Backs out the implied 5-year revenue CAGR and FCF generation embedded in current market prices using a deterministic bisection solver.
+   - Categorizes market expectations into `CONSERVATIVE`, `REALISTIC`, `AGGRESSIVE`, and `EXTREME`.
+3. **Relative Multiples Benchmarking:**
+   - Comprehensive multi-multiple engine (P/E, EV/EBITDA, P/B, EV/Sales) benchmarked against 1-Yr, 3-Yr, and 5-Yr historical percentiles.
+4. **Probabilistic Scenario Modeling:**
+   - Explicit Bear (25%), Base (50%), and Bull (25%) valuation trajectories with probability-weighted expected fair value and risk/reward asymmetry skew.
+5. **2D Sensitivity Matrices:**
+   - Dynamic 5x5 grids for Discount Rate (WACC) vs Terminal Growth Rate and Revenue Growth vs Operating Margin.
+6. **Financial Institutions Valuation Engine:**
+   - Multi-Stage Dividend Discount Model (DDM) constrained by RBI Tier-1 Capital Adequacy retention minimums and Gordon Justified Price-to-Book ($\frac{\text{ROE}-g}{K_e-g}$).
 
 ---
 
