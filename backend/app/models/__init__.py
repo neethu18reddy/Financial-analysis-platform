@@ -67,6 +67,26 @@ from app.models.document_intelligence import (
     IngestionUploadResponse,
 )
 
+from app.models.ai_analyst import (
+    QuestionIntent,
+    ClaimGroundingStatus,
+    GuidanceCategory,
+    DeliveryStatus,
+    WatchlistAlertSeverity,
+    WatchlistRecord,
+    ManagementGuidanceRecord,
+    AnalyticalClaim,
+    AIAnalystQuery,
+    AIAnalystResponse,
+    ManagementSaidVsDidItem,
+    ManagementSaidVsDidResponse,
+    PointInTimeAnalysisRequest,
+    PointInTimeAnalysisResponse,
+    WatchlistAlert,
+    WatchlistItemDTO,
+    CompanyResearchReport,
+)
+
 __all__ = [
     "Base",
     "TimestampMixin",
@@ -135,5 +155,23 @@ __all__ = [
     "DocumentRetrievalResult",
     "DocumentRetrievalResponse",
     "IngestionUploadResponse",
+    "QuestionIntent",
+    "ClaimGroundingStatus",
+    "GuidanceCategory",
+    "DeliveryStatus",
+    "WatchlistAlertSeverity",
+    "WatchlistRecord",
+    "ManagementGuidanceRecord",
+    "AnalyticalClaim",
+    "AIAnalystQuery",
+    "AIAnalystResponse",
+    "ManagementSaidVsDidItem",
+    "ManagementSaidVsDidResponse",
+    "PointInTimeAnalysisRequest",
+    "PointInTimeAnalysisResponse",
+    "WatchlistAlert",
+    "WatchlistItemDTO",
+    "CompanyResearchReport",
 ]
+
 
